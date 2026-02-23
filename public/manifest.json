@@ -1,0 +1,15 @@
+{
+  "name": "Abu Zahra App",
+  "short_name": "AbuZahra",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "https://replit.com/badge",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
