@@ -129,4 +129,21 @@ app.post("/twiml", (req, res) => {
   res.send(response.toString());
 });
 
+app.get("/api/token", authenticate, (req, res) => {
+  const AccessToken = twilio.jwt.AccessToken;
+  const VoiceGrant = AccessToken.VoiceGrant;
+  const token = new AccessToken(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_API_KEY || process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_API_SECRET || process.env.TWILIO_AUTH_TOKEN
+  );
+  token.identity = `user_${req.userId}`;
+  const grant = new VoiceGrant({
+    outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID,
+    incomingAllow: true,
+  });
+  token.addGrant(grant);
+  res.json({ ok: true, token: token.toJwt() });
+});
+
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
