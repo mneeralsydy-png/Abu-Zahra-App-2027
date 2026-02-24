@@ -1,0 +1,8 @@
+{
+  "appId": "com.munir.abuzahra",
+  "appName": "Abu Zahra",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -2,469 +2,1043 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>منير رقم 1 - الخاص</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>أبو الزهراء - الاتصال الآمن</title>
+
+    <!-- المكتبات والتصاميم (لم يتم تغييرها) -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-    <script src="https://sdk.twilio.com/js/voice/v2.1.1/twilio.min.js"></script>
+
+    <!-- SDKs (Capacitor Plugins & Firebase & Twilio) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://media.twiliocdn.com/sdk/js/client/v1.18/twilio.min.js"></script>
+
+    <!-- Capacitor Core Plugins (Native Features) -->
+    <script src="https://unpkg.com/@capacitor/core@5/dist/capacitor.js"></script>
+    <script src="https://unpkg.com/@capacitor/permissions@5/dist/permissions.js"></script>
+    <script src="https://unpkg.com/@capacitor/local-notifications@5/dist/local-notifications.js"></script>
+    <script src="https://unpkg.com/@capacitor/app@5/dist/app.js"></script>
+
+    <!-- Capacitor Google Auth (For Native Login) -->
+    <script src="https://unpkg.com/@capacitor/google-auth@1.1.0/dist/plugin.js"></script>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=AX77yPd3nZvqVsQtTKLAUXVLk9ieO71wvjDk2m3alQcG7ft_J6EOGlacBjrcOvAVghFiYWwPee2S3sfg&currency=USD" async></script>
+
     <style>
-        :root {
-            --primary-color: #1a237e;
-            --primary-light: #534bae;
-            --primary-dark: #000051;
-            --secondary-color: #ffd600;
-            --accent-green: #2e7d32;
-            --accent-red: #c62828;
-            --bg-color: #f5f5f5;
-            --white: #ffffff;
-            --text-dark: #212121;
-            --text-gray: #757575;
-            --border-radius: 16px;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Cairo', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: #121212;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--text-dark);
-            overflow: hidden;
-        }
-
-        #app-container {
-            width: 100%;
-            max-width: 414px;
-            height: 100vh;
-            max-height: 896px;
-            background-color: var(--bg-color);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
-        }
+        /* --- تصميم أبو الزهراء الأزرق (لم يتم تغييره) --- */
+        :root { --primary-azure: #0078D7; --primary-dark: #005A9E; --white: #ffffff; --bg: #f0f2f5; --text: #333; --green: #107C10; --red: #A80000; --gray: #999; --yellow: #FFC107; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        #app { width: 100%; max-width: 400px; height: 100vh; max-height: 850px; background: #fff; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,0,0,0.2); }
 
         /* Splash Screen */
-        #splash-screen {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            transition: opacity 0.5s ease-out;
-        }
-        .splash-logo {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        #splash-screen { position: absolute; inset: 0; background: linear-gradient(135deg, #004e92, #000428); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; transition: opacity 0.5s ease-out; }
+        .splash-logo { font-size: 5rem; margin-bottom: 10px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* Login Screen */
-        #login-screen {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--white);
-            z-index: 9000;
-            display: flex;
-            flex-direction: column;
-            padding: 40px 30px;
-        }
-        .login-header {
-            text-align: center;
-            margin-bottom: 50px;
-            margin-top: 40px;
-        }
-        .login-header i {
-            font-size: 4rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-        .login-header h1 {
-            font-size: 1.8rem;
-            color: var(--primary-dark);
-            font-weight: 700;
-        }
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: var(--text-gray); }
-        .form-input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #eee;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: border-color 0.3s;
-            text-align: right;
-            outline: none;
-        }
-        .form-input:focus { border-color: var(--primary-light); }
-        .btn-login {
-            width: 100%;
-            padding: 16px;
-            background-color: var(--primary-color);
-            color: var(--white);
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: var(--shadow-md);
-            margin-top: 10px;
-        }
+        /* Auth */
+        .auth-container { position: absolute; inset: 0; background: var(--primary-azure); color: white; z-index: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: opacity 0.3s; }
+        .auth-logo { font-size: 4rem; margin-bottom: 10px; color: var(--white); text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .auth-title { font-size: 2rem; font-weight: 700; margin-bottom: 40px; letter-spacing: 1px; }
+        .auth-btn-group { display: flex; flex-direction: column; gap: 15px; width: 80%; }
+        .btn-auth-lg { padding: 15px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-white { background: white; color: var(--primary-azure); }
+        .btn-blue { background: transparent; color: white; border: 1px solid white; }
+        .btn-google { background: white; color: #555; border: 1px solid #ddd; font-weight: 600; }
+        .btn-google i { color: #DB4437; font-size: 1.2rem; }
+        .auth-form { background: white; width: 90%; max-width: 350px; padding: 30px; border-radius: 20px; color: var(--text); box-shadow: 0 10px 30px rgba(0,0,0,0.1); animation: slideUp 0.3s ease-out; }
+        .form-input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; transition: 0.3s; background: #fafafa; }
+        .form-input:focus { border-color: var(--primary-azure); background: #fff; }
 
-        /* Main App Interface */
-        .page {
-            flex: 1;
-            display: none;
-            flex-direction: column;
-            background-color: var(--bg-color);
-            padding-bottom: 80px;
-            overflow-y: auto;
-        }
-        .page.active { display: flex; }
+        /* Main Interface */
+        #main-interface { flex: 1; display: flex; flex-direction: column; height: 100%; opacity: 0; visibility: hidden; transition: opacity 0.5s; }
+        #main-interface.visible { opacity: 1; visibility: visible; }
+        header { background: var(--primary-azure); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; }
+        .header-left { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .status-dot { width: 10px; height: 10px; background: #00E676; border-radius: 50%; box-shadow: 0 0 8px #00E676; }
+        .header-balance { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: 0.2s; }
 
-        /* Dialer Styles */
-        .dialer-header {
-            padding: 30px 20px;
-            background: var(--white);
-            text-align: center;
-            border-bottom: 1px solid #eee;
-        }
-        .balance-chip {
-            display: inline-flex;
-            align-items: center;
-            background: #e8eaf6;
-            color: var(--primary-color);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
-        .dial-number {
-            font-size: 2.8rem;
-            height: 60px;
-            color: var(--text-dark);
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .keypad-container {
-            flex: 1;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 30px 40px;
-            align-content: center;
-        }
-        .key-btn {
-            aspect-ratio: 1/1;
-            background: var(--white);
-            border: none;
-            border-radius: 50%;
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: var(--primary-dark);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-sm);
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-        }
-        .key-btn:active { transform: scale(0.92); background: #f0f0f0; }
-        .key-sub { font-size: 0.7rem; color: var(--text-gray); margin-top: -5px; }
-        
-        .action-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 40px;
-            padding: 20px 0 40px 0;
-        }
-        .call-trigger {
-            width: 80px;
-            height: 80px;
-            background-color: var(--accent-green);
-            color: var(--white);
-            border: none;
-            border-radius: 50%;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 16px rgba(46,125,50,0.3);
-            cursor: pointer;
-        }
-        .backspace-btn {
-            font-size: 1.8rem;
-            color: var(--text-gray);
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
+        .page { flex: 1; overflow-y: auto; display: none; padding-bottom: 75px; background: var(--bg); position: relative; -webkit-overflow-scrolling: touch; }
+        .page.active { display: block; }
 
-        /* Nav Bar */
-        .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 75px;
-            background: var(--white);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #eee;
-            padding-bottom: env(safe-area-inset-bottom);
-            z-index: 1000;
-        }
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #bdbdbd;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        .nav-item.active { color: var(--primary-color); }
-        .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
+        /* Dialer */
+        .dial-display { background: white; padding: 30px 20px; text-align: center; border-bottom: 1px solid #eee; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        #dial-number { font-size: 2.5rem; font-weight: 700; min-height: 50px; letter-spacing: 2px; color: var(--primary-azure); }
+        #alias-input-container { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out; background: #f0f8ff; border-top: 1px solid #e3f2fd; margin-top: 15px; }
+        #alias-input-container.open { max-height: 60px; padding-top: 10px; }
+        #alias-input { width: 90%; padding: 8px 12px; border: 1px solid var(--primary-azure); border-radius: 20px; text-align: center; color: var(--primary-azure); background: white; outline: none; font-size: 0.9rem; }
+        .dial-options { display: flex; justify-content: center; gap: 25px; margin-top: 15px; }
+        .toggle-label { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #555; cursor: pointer; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .2s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-azure); }
+        input:checked + .slider:before { transform: translateX(18px); }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 30px; }
+        .key { background: white; width: 70px; height: 70px; border-radius: 50%; margin: 0 auto; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 1.8rem; color: var(--primary-azure); font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; border: 1px solid rgba(0,120,215,0.05); touch-action: manipulation; transition: 0.1s; }
+        .key:active { background: #E3F2FD; transform: scale(0.92); }
+        .key sub { font-size: 0.7rem; color: var(--primary-azure); opacity: 0.6; margin-top: -4px; font-weight: 400; pointer-events: none; }
+        .dial-actions { display: flex; justify-content: center; gap: 25px; padding-bottom: 20px; }
+        .circle-btn { width: 65px; height: 65px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; cursor: pointer; background: white; color: var(--text); touch-action: manipulation; transition: 0.1s; }
+        .circle-btn:active { transform: scale(0.9); }
+        .btn-call { background: var(--primary-azure); color: white; width: 75px; height: 75px; font-size: 2rem; box-shadow: 0 6px 20px rgba(0,120,215,0.3); }
+        .btn-del { color: #d32f2f; }
+        .btn-add { color: var(--primary-azure); }
 
-        /* Headers */
-        .page-header {
-            background: var(--primary-color);
-            color: var(--white);
-            padding: 20px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-            box-shadow: var(--shadow-sm);
-        }
+        /* Tabs */
+        .tabs { display: flex; background: white; padding: 0 10px; border-bottom: 1px solid #ddd; }
+        .tab { flex: 1; text-align: center; padding: 14px; color: #666; font-size: 0.9rem; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600; }
+        .tab.active { color: var(--primary-azure); border-bottom-color: var(--primary-azure); }
 
         /* List Items */
-        .list-container { padding: 15px; }
-        .list-card {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            margin-bottom: 12px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--shadow-sm);
-        }
-        .list-info h4 { font-size: 1.1rem; color: var(--text-dark); margin-bottom: 4px; }
-        .list-info p { font-size: 0.85rem; color: var(--text-gray); }
-        .list-amount { font-weight: 700; color: var(--accent-red); }
+        .list-item { background: white; padding: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .list-item:active { background: #f8f9fa; }
+        .item-info { display: flex; align-items: center; gap: 15px; flex: 1; }
+        .avatar { width: 48px; height: 48px; background: #E1F5FE; color: var(--primary-azure); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        .item-details h4 { font-size: 1rem; color: #333; margin-bottom: 2px; }
+        .item-details p { font-size: 0.85rem; color: #888; }
 
-        /* Wallet */
-        .balance-card {
-            background: linear-gradient(45deg, var(--primary-dark), var(--primary-light));
-            margin: 20px;
-            padding: 40px 20px;
-            border-radius: 24px;
-            color: var(--white);
-            text-align: center;
-            box-shadow: var(--shadow-md);
-        }
-        .balance-card p { opacity: 0.8; font-size: 1rem; }
-        .balance-card h2 { font-size: 3rem; margin: 10px 0; font-weight: 800; }
-        .topup-btn {
-            background: var(--secondary-color);
-            color: var(--primary-dark);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 1rem;
-            margin-top: 15px;
-            cursor: pointer;
-        }
+        /* More Grid */
+        .more-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 20px; }
+        .more-card { background: white; padding: 25px 10px; border-radius: 18px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .more-card:active { transform: scale(0.95); border-color: #eee; }
+        .more-icon { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 10px; color: white; }
 
-        /* Call Overlay */
-        #call-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.92);
-            z-index: 11000;
-            color: var(--white);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-around;
-            padding: 60px 20px;
-        }
+        /* Nav */
+        nav { position: absolute; bottom: 0; width: 100%; height: 70px; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-around; align-items: center; z-index: 50; }
+        .nav-item { color: #999; text-align: center; font-size: 0.7rem; cursor: pointer; width: 20%; touch-action: manipulation; }
+        .nav-item i { font-size: 1.4rem; margin-bottom: 4px; transition: 0.2s; }
+        .nav-item.active { color: var(--primary-azure); }
+
+        /* Sub Pages */
+        .sub-page { position: absolute; inset: 0; background: white; z-index: 200; display: none; flex-direction: column; animation: slideIn 0.3s ease-out; }
+        .sub-header { background: var(--primary-azure); color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .sub-content { flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa; }
+        .info-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .btn-block { width: 100%; padding: 14px; background: var(--primary-azure); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
+
+        /* Chat */
+        .chat-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; }
+        .message-bubble { max-width: 75%; padding: 10px 15px; border-radius: 15px; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
+        .msg-received { background: #e0e0e0; color: #333; align-self: flex-start; border-bottom-right-radius: 2px; }
+        .msg-sent { background: var(--primary-azure); color: white; align-self: flex-end; border-bottom-left-radius: 2px; }
+        .chat-input-area { padding: 10px; background: #fff; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        .tab-fab { position: absolute; bottom: 85px; left: 20px; width: 55px; height: 55px; background: var(--primary-azure); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 6; font-size: 1.3rem; }
+
+        /* Call Screen */
+        #call-screen { position: absolute; inset: 0; background: linear-gradient(180deg, #004e92, #000428); color: white; z-index: 300; display: none; flex-direction: column; justify-content: space-between; padding: 60px 20px; }
         .caller-info { text-align: center; }
-        .caller-info h2 { font-size: 2.5rem; margin-bottom: 10px; }
-        .call-status { font-size: 1.2rem; color: var(--secondary-color); font-weight: 600; }
-        .call-timer { font-size: 3rem; font-weight: 200; margin-top: 20px; }
-        .end-call-btn {
-            width: 80px;
-            height: 80px;
-            background-color: var(--accent-red);
-            color: var(--white);
-            border: none;
-            border-radius: 50%;
-            font-size: 2.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(198,40,40,0.4);
-            cursor: pointer;
-        }
+        .caller-avatar { width: 120px; height: 120px; background: rgba(255,255,255,0.15); border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; border: 2px solid rgba(255,255,255,0.2); }
+        .call-status { font-size: 1.2rem; opacity: 0.9; margin-top: 10px; }
+        .call-timer { font-size: 3rem; font-weight: 300; margin-top: 20px; font-family: monospace; display: none; }
+        .call-controls { display: flex; gap: 30px; justify-content: center; margin-bottom: 40px; }
+        .ctrl-btn { width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; transition: 0.2s; }
+        .ctrl-btn.active { background: white; color: var(--primary-azure); transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        .btn-end-wide { width: 200px; padding: 15px; background: var(--red); color: white; border: none; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(168, 0, 0, 0.3); margin: 0 auto; }
+        #dtmf-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.98); padding: 20px; display: none; grid-template-columns: repeat(3, 1fr); gap: 15px; border-radius: 25px 25px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 350; }
 
-        .hidden { display: none !important; }
+        /* Utils */
+        #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.95rem; opacity: 0; transition: 0.3s; z-index: 600; pointer-events: none; text-align: center; }
+        #toast.show { opacity: 1; }
+
+        /* Account */
+        .account-header { text-align: center; margin-bottom: 20px; }
+        .account-avatar { width: 80px; height: 80px; background: var(--primary-azure); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; }
+        .account-field { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; border: 1px solid #eee; }
+        .field-icon { width: 40px; height: 40px; background: #f0f8ff; color: var(--primary-azure); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 15px; font-size: 1.1rem; }
+        .field-content { flex: 1; }
+        .field-label { font-size: 0.8rem; color: #888; margin-bottom: 4px; }
+        .field-value { font-weight: 600; color: #333; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between; background: #fafafa; padding: 8px 12px; border-radius: 8px; border: 1px solid #e0e0e0; }
+        .copy-btn { color: var(--primary-azure); cursor: pointer; font-size: 1rem; padding: 5px; transition: 0.2s; }
     </style>
 </head>
 <body>
-    <div id="app-container">
-        <!-- Splash Screen -->
-        <div id="splash-screen">
-            <div class="splash-logo"><i class="fas fa-phone-alt"></i></div>
-            <h1 style="font-size: 2.5rem; font-weight: 800; letter-spacing: 1px;">منير رقم 1</h1>
-            <p style="margin-top: 10px; opacity: 0.7; font-weight: 600;">بوابتك للاتصال الخاص</p>
-        </div>
 
-        <!-- Login Screen -->
-        <div id="login-screen" class="hidden">
-            <div class="login-header">
-                <i class="fas fa-shield-alt"></i>
-                <h1>تسجيل الدخول</h1>
-                <p style="color: var(--text-gray); margin-top: 5px;">أدخل بياناتك للبدء</p>
-            </div>
-            <div class="form-group">
-                <label class="form-label">البريد الإلكتروني</label>
-                <input type="email" id="login-email" class="form-input" placeholder="example@mail.com">
-            </div>
-            <div class="form-group">
-                <label class="form-label">كلمة المرور</label>
-                <input type="password" id="login-pass" class="form-input" placeholder="••••••••">
-            </div>
-            <button class="btn-login" onclick="handleAuth('login')">دخول آمن</button>
-            <p style="text-align: center; margin-top: 30px; font-size: 0.85rem; color: var(--text-gray);">بالمتابعة أنت توافق على شروط الخدمة</p>
-        </div>
+<div id="app">
+    <!-- 1. Splash Screen -->
+<div id="splash-screen">
+        <i class="fas fa-phone-volume splash-logo"></i>
+        <div class="auth-title">أبو الزهراء</div>
+    </div>
 
-        <!-- Main Content -->
-        <div id="main-app" class="hidden" style="flex: 1; display: flex; flex-direction: column;">
-            <!-- Dialer -->
-            <section id="page-dialer" class="page active">
-                <div class="dialer-header">
-                    <div class="balance-chip" onclick="switchTab('page-wallet', document.querySelector('[data-tab=wallet]'))">
-                        <i class="fas fa-wallet" style="margin-left: 8px;"></i>
-                        <span id="balance-val">$0.00</span>
-                    </div>
-                    <div class="dial-number" id="dial-display"></div>
-                </div>
-                <div class="keypad-container">
-                    <button class="key-btn" onclick="dial('1')">1<span class="key-sub"> </span></button>
-                    <button class="key-btn" onclick="dial('2')">2<span class="key-sub">ABC</span></button>
-                    <button class="key-btn" onclick="dial('3')">3<span class="key-sub">DEF</span></button>
-                    <button class="key-btn" onclick="dial('4')">4<span class="key-sub">GHI</span></button>
-                    <button class="key-btn" onclick="dial('5')">5<span class="key-sub">JKL</span></button>
-                    <button class="key-btn" onclick="dial('6')">6<span class="key-sub">MNO</span></button>
-                    <button class="key-btn" onclick="dial('7')">7<span class="key-sub">PQRS</span></button>
-                    <button class="key-btn" onclick="dial('8')">8<span class="key-sub">TUV</span></button>
-                    <button class="key-btn" onclick="dial('9')">9<span class="key-sub">WXYZ</span></button>
-                    <button class="key-btn" onclick="dial('*')">*<span class="key-sub"> </span></button>
-                    <button class="key-btn" onclick="dial('0')">0<span class="key-sub">+</span></button>
-                    <button class="key-btn" onclick="dial('#')">#<span class="key-sub"> </span></button>
-                </div>
-                <div class="action-row">
-                    <div style="width: 40px;"></div> <!-- Spacer -->
-                    <button class="call-trigger" id="call-button" onclick="makeCall()"><i class="fas fa-phone"></i></button>
-                    <button class="backspace-btn" onclick="deleteDigit()"><i class="fas fa-backspace"></i></button>
-                </div>
-            </section>
-
-            <!-- Recents -->
-            <section id="page-recents" class="page">
-                <div class="page-header">سجل المكالمات</div>
-                <div class="list-container" id="recents-list"></div>
-            </section>
-
-            <!-- Wallet -->
-            <section id="page-wallet" class="page">
-                <div class="page-header">محفظتي</div>
-                <div class="balance-card">
-                    <p>الرصيد المتاح</p>
-                    <h2 id="wallet-val">$0.00</h2>
-                    <button class="topup-btn" onclick="alert('خدمة الشحن تتوفر قريباً عبر PayPal')">شحن الرصيد</button>
-                </div>
-            </section>
-
-            <!-- Profile -->
-            <section id="page-profile" class="page">
-                <div class="page-header">حسابي</div>
-                <div style="padding: 20px;">
-                    <div class="list-card" style="margin-bottom: 20px;">
-                        <div class="list-info">
-                            <h4>رقم الحساب (UID)</h4>
-                            <p id="profile-uid">---</p>
-                        </div>
-                        <i class="fas fa-id-card" style="color: var(--primary-color); font-size: 1.5rem;"></i>
-                    </div>
-                    <div class="list-card">
-                        <div class="list-info">
-                            <h4>إصدار التطبيق</h4>
-                            <p>V 1.0.0</p>
-                        </div>
-                        <i class="fas fa-info-circle" style="color: var(--text-gray); font-size: 1.5rem;"></i>
-                    </div>
-                    <button class="btn-login" style="background: var(--accent-red); margin-top: 40px;" onclick="handleLogout()">تسجيل الخروج</button>
-                </div>
-            </section>
-
-            <!-- Navigation -->
-            <nav class="bottom-nav">
-                <div class="nav-item active" onclick="switchTab('page-dialer', this)"><i class="fas fa-th"></i>لوحة</div>
-                <div class="nav-item" onclick="switchTab('page-recents', this); loadHistory();"><i class="fas fa-history"></i>السجل</div>
-                <div class="nav-item" data-tab="wallet" onclick="switchTab('page-wallet', this)"><i class="fas fa-wallet"></i>محفظة</div>
-                <div class="nav-item" onclick="switchTab('page-profile', this)"><i class="fas fa-user-circle"></i>حسابي</div>
-            </nav>
-        </div>
-
-        <!-- Call Overlay -->
-        <div id="call-overlay">
-            <div class="caller-info">
-                <h2 id="calling-num">...</h2>
-                <p class="call-status" id="call-status">جاري الاتصال...</p>
-                <div class="call-timer" id="call-timer">00:00</div>
-            </div>
-            <button class="end-call-btn" onclick="hangup()"><i class="fas fa-phone-slash"></i></button>
+    <!-- 2. Auth Containers -->
+<div id="auth-start" class="auth-container" style="display:block;">
+        <i class="fas fa-phone-volume auth-logo"></i>
+        <div class="auth-title">أبو الزهراء</div>
+        <div class="auth-btn-group">
+            <button class="btn-auth-lg btn-white" onclick="showAuth('welcome')">دخول / تسجيل</button>
         </div>
     </div>
 
-    <!-- Capacitor & SDKs -->
-    <script src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>
-    <script src="script.js"></script>
+    <div id="auth-welcome" class="auth-container" style="display:none;">
+        <div class="auth-logo" style="font-size:3rem; margin-bottom:20px;"><i class="fas fa-user-circle"></i></div>
+        <div class="auth-btn-group">
+            <button class="btn-auth-lg btn-white" onclick="showAuth('login')">تسجيل الدخول</button>
+            <!-- زر Google يفعل دالة handleGoogleLogin في الكود الجديد -->
+<button class="btn-auth-lg btn-google" onclick="handleGoogleLogin('982107544824-1ol6hfhnntfe3jh0huoudpitmhojrmke.apps.googleusercontent.com', '982107544824-jbl3da73lr9h7il169onbl4ftrkmhvaj.apps.googleusercontent.com')">
+    <i class="fab fa-google"></i> تسجيل الدخول عبر جوجل
+</button>
+        </div>
+    </div>
+
+    <div id="auth-login" class="auth-container" style="display:none; background: white; color: var(--text);">
+        <div class="auth-form">
+            <h2 style="color:var(--primary-azure); margin-bottom:20px;">مرحباً بعودتك</h2>
+            <input type="email" id="login-email" class="form-input" placeholder="البريد الإلكتروني">
+            <input type="password" id="login-pass" class="form-input" placeholder="كلمة المرور">
+            <button class="btn-block" onclick="handleLogin()">دخول</button>
+            <div class="btn-back" onclick="showAuth('welcome')">الرجوع</div>
+        </div>
+    </div>
+
+    <!-- 3. Main Interface -->
+    <div id="main-interface">
+        <header>
+            <div class="header-left">
+                <div class="status-dot"></div>
+                <span style="font-weight:bold; font-size:1.1rem;">أبو الزهراء</span>
+            </div>
+            <div class="header-balance" onclick="openSubPage('page-topup')">
+                <i class="fas fa-wallet"></i> $<span id="header-balance">0.00</span>
+            </div>
+        </header>
+
+        <!-- Dialer Page -->
+        <div id="page-dialer" class="page active">
+            <div class="dial-display">
+                <div id="dial-number"></div>
+                <div id="alias-input-container">
+                    <input type="text" id="alias-input" placeholder="كتابة الاسم المراد ظهوره">
+                </div>
+                <div class="dial-options">
+                    <label class="toggle-label">
+                        <div class="switch">
+                            <input type="checkbox" id="chk-record">
+                            <span class="slider"></span>
+                        </div>
+                        تسجيل
+                    </label>
+                    <label class="toggle-label">
+                        <div class="switch">
+                            <input type="checkbox" id="chk-hide-id" onchange="toggleAlias()">
+                            <span class="slider"></span>
+                        </div>
+                        إخفاء رقم المتصل
+                    </label>
+                </div>
+            </div>
+            <div class="keypad">
+                <div class="key" onclick="dial('1')">1</div><div class="key" onclick="dial('2')">2<sub>ABC</sub></div><div class="key" onclick="dial('3')">3<sub>DEF</sub></div>
+                <div class="key" onclick="dial('4')">4<sub>GHI</sub></div><div class="key" onclick="dial('5')">5<sub>JKL</sub></div><div class="key" onclick="dial('6')">6<sub>MNO</sub></div>
+                <div class="key" onclick="dial('7')">7<sub>PQRS</sub></div><div class="key" onclick="dial('8')">8<sub>TUV</sub></div><div class="key" onclick="dial('9')">9<sub>WXYZ</sub></div>
+                <div class="key" onclick="dial('*')">*</div>
+                <div class="key" id="key-0">0<sub>+</sub></div>
+                <div class="key" onclick="dial('#')">#</div>
+            </div>
+            <div class="dial-actions">
+                <button class="circle-btn btn-add" onclick="openAddContact()"><i class="fas fa-user-plus"></i></button>
+                <button class="circle-btn btn-call" onclick="initiateRealCall()"><i class="fas fa-phone"></i></button>
+                <button class="circle-btn btn-del" id="btn-delete"><i class="fas fa-backspace"></i></button>
+            </div>
+        </div>
+
+        <!-- Contacts Page -->
+        <div id="page-contacts" class="page">
+            <div style="padding: 20px; text-align: center; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;" id="contacts-empty-state">
+                <i class="fas fa-address-book" style="font-size: 3rem; color: var(--primary-azure); margin-bottom: 15px; opacity: 0.5;"></i>
+                <p style="margin-bottom: 10px;">للدخول على جهات الاتصال</p>
+                <button class="btn-block" style="width: auto; padding: 12px 30px;" onclick="triggerNativeContacts()">فتح قائمة الهاتف</button>
+            </div>
+            <div id="contacts-list" style="padding-top:10px;"></div>
+        </div>
+
+        <!-- Logs Page -->
+        <div id="page-logs" class="page">
+            <div class="tabs">
+                <div class="tab active" id="tab-logs-all" onclick="renderLogs('all')">كل المكالمات</div>
+                <div class="tab" id="tab-logs-rec" onclick="renderLogs('recordings')">التسجيلات</div>
+            </div>
+            <div id="logs-list" style="padding-top:10px;"></div>
+        </div>
+
+        <!-- Messages Page -->
+        <div id="page-messages" class="page">
+            <div class="tabs">
+                <div class="tab active" id="tab-msg-notif" onclick="switchMsgTab('notifications')">الإشعارات</div>
+                <div class="tab" id="tab-msg-sms" onclick="switchMsgTab('sms')">SMS</div>
+            </div>
+            <div id="msg-notifications" style="padding-top:10px;">
+                <div style="padding:20px; text-align:center; color:#999;">
+                    <i class="fas fa-bell" style="font-size:2rem; margin-bottom:10px;"></i>
+                    <p>لا توجد إشعارات جديدة</p>
+                </div>
+            </div>
+            <div id="msg-sms" style="padding-top:10px; display:none;">
+                <div class="tab-fab" onclick="openNewMessageUI()"><i class="fas fa-pen"></i></div>
+                <div id="messages-list"></div>
+            </div>
+        </div>
+
+        <!-- More Page -->
+        <div id="page-more" class="page">
+            <div class="more-grid">
+                <div class="more-card" onclick="openSubPage('page-topup')">
+                    <div class="more-icon" style="background:#FF9800;"><i class="fas fa-credit-card"></i></div>
+                    <div class="more-label">إعادة الشحن</div>
+                </div>
+                <div class="more-card" onclick="openSubPage('page-rates')">
+                    <div class="more-icon" style="background:#9C27B0;"><i class="fas fa-search-dollar"></i></div>
+                    <div class="more-label">التعرفة</div>
+                </div>
+                <div class="more-card" onclick="openSubPage('page-reports')">
+                    <div class="more-icon" style="background:#607D8B;"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="more-label">التقارير</div>
+                </div>
+                <div class="more-card" onclick="openSubPage('page-account')">
+                    <div class="more-icon" style="background:#4CAF50;"><i class="fas fa-id-card"></i></div>
+                    <div class="more-label">حسابي</div>
+                </div>
+                <div class="more-card" onclick="openSubPage('page-transfer')">
+                    <div class="more-icon" style="background:#F44336;"><i class="fas fa-exchange-alt"></i></div>
+                    <div class="more-label">تحويل الرصيد</div>
+                </div>
+                <div class="more-card" onclick="window.open('https://wa.me/967784702352', '_blank')">
+                    <div class="more-icon" style="background:#25D366;"><i class="fab fa-whatsapp"></i></div>
+                    <div class="more-label">الدعم</div>
+                </div>
+            </div>
+            <div style="text-align:center; padding:20px;">
+                <button class="btn-auth" style="background:#eee; color:#666; padding:10px 25px;" onclick="handleLogout()">تسجيل الخروج</button>
+            </div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <nav>
+            <div class="nav-item active" onclick="nav('page-dialer', this)"><i class="fas fa-th"></i>الشبكة</div>
+            <div class="nav-item" onclick="nav('page-logs', this)"><i class="fas fa-clock"></i>السجل</div>
+            <div class="nav-item" onclick="nav('page-contacts', this)"><i class="fas fa-user-friends"></i>الأسماء</div>
+            <div class="nav-item" onclick="nav('page-messages', this)"><i class="fas fa-comment-alt"></i>الرسائل</div>
+            <div class="nav-item" onclick="nav('page-more', this)"><i class="fas fa-bars"></i>المزيد</div>
+        </nav>
+    </div>
+
+    <!-- --- Sub Pages --- -->
+    <div id="page-topup" class="sub-page">
+        <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('page-topup')"></i> <span>شحن الرصيد</span></div>
+        <div class="sub-content">
+            <h3 style="text-align:center; margin-bottom:20px; color:#555;">اختر الباقة</h3>
+            <div class="more-grid">
+                <div class="more-card" onclick="selectPrice(0.99, this)"><div style="font-weight:bold; font-size:1.2rem;">$0.99</div></div>
+                <div class="more-card" onclick="selectPrice(4.99, this)"><div style="font-weight:bold; font-size:1.2rem;">$4.99</div></div>
+                <div class="more-card" onclick="selectPrice(9.99, this)"><div style="font-weight:bold; font-size:1.2rem;">$9.99</div></div>
+                <div class="more-card" onclick="selectPrice(24.99, this)"><div style="font-weight:bold; font-size:1.2rem;">$24.99</div></div>
+                <div class="more-card" onclick="selectPrice(49.99, this)"><div style="font-weight:bold; font-size:1.2rem;">$49.99</div></div>
+            </div>
+            <div id="paypal-container" style="min-height:50px; margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <div id="page-rates" class="sub-page">
+        <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('page-rates')"></i> <span>استعلام التعرفة</span></div>
+        <div class="sub-content">
+            <div class="info-card">
+                <label style="display:block; margin-bottom:10px; font-weight:bold;">رقم الهاتف</label>
+                <input type="text" id="rate-phone" class="form-input" placeholder="مثال: +967 777...">
+            </div>
+            <button class="btn-block" onclick="checkRate()">استعلام السعر</button>
+        </div>
+    </div>
+
+    <div id="page-reports" class="sub-page">
+        <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('page-reports')"></i> <span>سجل المعاملات</span></div>
+        <div class="sub-content" id="reports-list"></div>
+    </div>
+
+    <div id="page-account" class="sub-page">
+        <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('page-account')"></i> <span>حسابي</span></div>
+        <div class="sub-content" style="padding: 20px;">
+            <div class="account-header">
+                <div class="account-avatar"><i class="fas fa-user-shield"></i></div>
+                <h3>أبو الزهراء VIP</h3>
+            </div>
+            <div class="account-field">
+                <div class="field-icon"><i class="fas fa-id-badge"></i></div>
+                <div class="field-content">
+                    <div class="field-label">رقم الحساب (UID)</div>
+                    <div class="field-value">
+                        <span id="account-us-number-display">جاري التحميل...</span>
+                        <i class="far fa-copy copy-btn" onclick="copyToClipboard('account-us-number-display')" title="نسخ"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="account-field">
+                <div class="field-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="field-content">
+                    <div class="field-label">رقمك المخصص (+1820)</div>
+                    <div class="field-value">
+                        <span id="assigned-number-display">جاري التوليد...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-transfer" class="sub-page">
+        <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('page-transfer')"></i> <span>تحويل رصيد</span></div>
+        <div class="sub-content">
+            <div class="info-card">
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">رقم حساب المستلم (UID)</label>
+                <input type="text" id="transfer-to" class="form-input" placeholder="أدخل UID المستلم">
+            </div>
+            <div class="info-card">
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">المبلغ ($)</label>
+                <input type="number" id="transfer-amount" class="form-input" placeholder="0.00">
+            </div>
+            <button class="btn-block" style="background:#9C27B0;" onclick="processTransfer()">تأكيد التحويل</button>
+        </div>
+    </div>
+
+    <div id="modal-new-msg" class="sub-page">
+        <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('modal-new-msg')"></i> <span>رسالة جديدة</span></div>
+        <div class="sub-content">
+            <input type="text" id="new-msg-to" class="form-input" placeholder="إلى (رقم)">
+            <textarea id="new-msg-body" class="form-input" rows="3" placeholder="الرسالة"></textarea>
+            <button class="btn-block" onclick="sendNewMessage()">إرسال</button>
+        </div>
+    </div>
+
+    <div id="page-chat" class="sub-page">
+        <div class="sub-header">
+            <i class="fas fa-arrow-right" onclick="closeSubPage('page-chat')"></i> 
+            <span id="chat-contact-name">دردشة</span>
+        </div>
+        <div class="sub-content" style="display:flex; flex-direction:column; padding:0;">
+            <div id="chat-messages" class="chat-area"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" class="form-input" placeholder="اكتب رسالة...">
+                <button class="circle-btn" style="background:var(--primary-azure); color:white;" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-add-contact" class="sub-page">
+        <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('modal-add-contact')"></i> <span>إضافة جهة اتصال</span></div>
+        <div class="sub-content">
+            <input type="text" id="new-contact-name" class="form-input" placeholder="الاسم">
+            <input type="text" id="new-contact-number" class="form-input" placeholder="رقم الهاتف">
+            <button class="btn-block" onclick="saveNewContact()">حفظ</button>
+        </div>
+    </div>
+
+    <!-- Call Screen -->
+    <div id="call-screen">
+        <div class="caller-info">
+            <div class="caller-avatar"><i class="fas fa-user"></i></div>
+            <h2 id="call-name-display" style="margin-top:15px;">مجهول</h2>
+            <p id="call-number-display" style="opacity:0.8; font-size:1.2rem;">...</p>
+            <p id="call-status" class="call-status">جاري الاتصال...</p>
+            <p id="call-timer" class="call-timer">00:00</p>
+        </div>
+        <div id="dtmf-overlay">
+            <button class="key" onclick="sendDtmf('1')">1</button><button class="key" onclick="sendDtmf('2')">2</button><button class="key" onclick="sendDtmf('3')">3</button>
+            <button class="key" onclick="sendDtmf('4')">4</button><button class="key" onclick="sendDtmf('5')">5</button><button class="key" onclick="sendDtmf('6')">6</button>
+            <button class="key" onclick="sendDtmf('7')">7</button><button class="key" onclick="sendDtmf('8')">8</button><button class="key" onclick="sendDtmf('9')">9</button>
+            <button class="key" onclick="sendDtmf('*')">*</button><button class="key" onclick="sendDtmf('0')">0</button><button class="key" onclick="sendDtmf('#')">#</button>
+            <button class="btn-block" style="grid-column:span 3; background:#ddd; color:#333; font-size:0.9rem;" onclick="document.getElementById('dtmf-overlay').style.display='none'">إغلاق</button>
+        </div>
+        <div class="call-controls">
+            <div class="ctrl-btn" id="btn-mute" onclick="toggleMute(this)"><i class="fas fa-microphone"></i></div>
+            <div class="ctrl-btn" onclick="document.getElementById('dtmf-overlay').style.display='grid'"><i class="fas fa-th"></i></div>
+            <div class="ctrl-btn" id="btn-speaker" onclick="toggleSpeaker(this)"><i class="fas fa-volume-up"></i></div>
+        </div>
+        <div style="text-align:center; margin-bottom:30px;">
+            <button class="btn-end-wide" onclick="hangupCall()">إنهاء المكالمة</button>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. Configuration & Capacitor Setup
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyD8hrO2kX1zXaA46PImzMGqOt4iTwhXKI0",
+        authDomain: "call-now-24582.firebaseapp.com",
+        projectId: "call-now-24582",
+        storageBucket: "call-now-24582.firebasestorage.app",
+        databaseURL: "https://call-now-24582-default-rtdb.firebaseio.com",
+        messagingSenderId: "982107544824",
+        appId: "1:982107544824:web:c5b6806042ba44ff896f0d",
+        measurementId: "G-W27HMG1TKV"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // ربط جافاسكريبت بكاباسيتور (بدون import)
+    const { Permissions, LocalNotifications, App } = window.Capacitor.Plugins;
+    const CapacitorHttp = window.Capacitor.Http;
+
+    let device = null;
+    let currentUser = null;
+    let dialNumber = "";
+    let balance = 0.00;
+    let callTimer = null;
+    let callSeconds = 0;
+    let activeTransferPrice = 0;
+    let currentChatNumber = null;
+    let allLogs = [];
+const REPLIT_BACKEND_URL = 'https://6e192a57-0450-4647-9b9d-f85380b0545b-00-10l45y2na70p9.sisko.replit.dev';
+    // ==========================================
+    // 2. Runtime Permissions (Capacitor)
+    // ==========================================
+    async function requestAllPermissions() {
+        const permissionsList = [
+            'microphone', // For Twilio Calls
+            'contacts',   // For Contact Picker
+            'location',   // For Location
+            'notifications' // For Push Notifications
+        ];
+
+        for (const perm of permissionsList) {
+            const result = await Permissions.request({ name: perm });
+            console.log(`Permission ${perm}: ${result.state}`);
+        }
+
+        // Foreground Service for Android (Keep App Alive)
+        try {
+            const bgResult = await Permissions.query({ name: 'background-task' });
+            if (bgResult.state !== 'granted') {
+                await Permissions.request({ name: 'background-task' });
+            }
+        } catch (e) {
+            console.log("Background task permission not available");
+        }
+    }
+
+    // ==========================================
+    // 3. Native Google Login (Inside App)
+    // ==========================================
+async function handleGoogleLogin(clientId, serverClientId) {
+    try {
+window.Capacitor.Plugins.GoogleAuth.signIn            clientId: clientId,
+            scopes: ['email', 'profile'],
+            serverClientId: serverClientId
+        });
+
+            if (!googleUser || !googleUser.authentication) {
+                showToast("تم إلغاء تسجيل الدخول");
+                return;
+            }
+
+            // تسجيل الدخول في Firebase باستخدام التوكن
+            const credential = firebase.auth.GoogleAuthProvider.credential(googleUser.authentication.idToken);
+
+            const userCredential = await auth.signInWithCredential(credential);
+
+            console.log("User Logged In:", userCredential.user);
+            enterApp();
+
+        } catch (error) {
+            console.error("Google Login Failed:", error);
+            showToast("فشل تسجيل الدخول: " + error.message);
+        }
+    }
+
+    // ==========================================
+    // 4. Twilio VOIP Fix (WebRTC & Codec)
+    // ==========================================
+    async function initTwilioDevice() {
+        if(!currentUser) return;
+
+        try {
+            // 1. التحقق من صلاحية الميكروفون قبل كل شيء
+            const micPermission = await Permissions.query({ name: 'microphone' });
+            if (micPermission.state !== 'granted') {
+                console.error("Microphone permission denied.");
+                showToast("يجب السماح باستخدام الميكروفون");
+                return;
+            }
+
+            // 2. جلب التوكن من السيرفر (Replit)
+            const response = await CapacitorHttp.get({
+                url: `${REPLIT_BACKEND_URL}/token?identity=${currentUser.uid}`,
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.status !== 200) {
+                console.error("Failed to fetch Twilio token");
+                return;
+            }
+
+            const token = response.data; // التوقع أن السيرفر يرجع النص الخامد للتوكن
+
+            // 3. تهيئة جهاز Twilio بإعدادات VOIP صحيحة
+            device = new Twilio.Device(token, {
+                codecPreferences: ['opus', 'pcmu'], // Opus ضروري للجوال
+                enableRingingStateChange: true,
+                enableImprovedSignalingErrorHandling: true,
+                maxCallSignalingTimeout: 30,
+                edge: ['ashburn'] // Twilio Edge لتحسين الاتصال
+            });
+
+            device.on('ready', (device) => {
+                console.log('Twilio Device Ready for VOIP');
+            });
+
+            device.on('connect', (conn) => {
+                console.log('Call Connected via WebRTC');
+                const callScreen = document.getElementById('call-screen');
+                if(callScreen) callScreen.style.display='flex';
+                document.getElementById('call-status').innerText = "متصل";
+                const displayName = conn.parameters.CustomDisplayName || dialNumber;
+                document.getElementById('call-name-display').innerText = displayName;
+                startCallTimer();
+            });
+
+            device.on('disconnect', (connection) => {
+                console.log('Call Disconnected');
+                endCallUI();
+            });
+
+            device.on('error', (error) => { 
+                console.error("Twilio VOIP Error:", error); 
+                showToast("خطأ في الاتصال: " + error.message); 
+            });
+        } catch (err) { console.error("Twilio Init Error:", err); }
+    }
+
+    // ==========================================
+    // 5. Auth & App Startup Logic
+    // ==========================================
+    function showAuth(screen) {
+        document.querySelectorAll('.auth-container').forEach(el => el.style.display = 'none');
+        const target = document.getElementById('auth-' + screen); 
+        if (target) target.style.display = 'flex';
+    }
+    function showToast(msg) { 
+        const t = document.getElementById('toast'); 
+        if(t) { t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+    }
+    function openSubPage(id) { 
+        const el = document.getElementById(id);
+        if(el) el.style.display = 'flex'; 
+    }
+    function closeSubPage(id) { 
+        const el = document.getElementById(id);
+        if(el) el.style.display = 'none'; 
+    }
+    function copyToClipboard(elementId) {
+        const text = document.getElementById(elementId).innerText;
+        if(!text || text === 'جاري التحميل...') return;
+        navigator.clipboard.writeText(text).then(() => showToast("تم نسخ الرقم"));
+    }
+
+    async function handleLogin() {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        if(!email || !pass) return showToast('أكمل البيانات');
+
+        auth.signInWithEmailAndPassword(email, pass)
+            .then((user) => { 
+                fetch(`${REPLIT_BACKEND_URL}/setup-user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid: user.uid, email: user.email })
+                }).catch(e => console.error(e));
+                enterApp(); 
+            })
+            .catch(err => showToast(err.message));
+    }
+
+    function handleLogout() { auth.signOut().then(() => location.reload()); }
+
+    function generateAssignedNumber(uid) {
+        const randomPart = Math.floor(1000000 + Math.random() * 9000000);
+        return `+1820${randomPart}`;
+    }
+
+    function enterApp() {
+        document.querySelectorAll('.auth-container').forEach(el => el.style.display = 'none');
+        const mainInt = document.getElementById('main-interface');
+        if(mainInt) mainInt.classList.add('visible');
+
+        // عرض الـ UID وتوليد الرقم
+        const assignedRef = db.ref('users/' + currentUser.uid + '/assigned_number');
+        assignedRef.once('value', (snap) => {
+            if (!snap.exists()) {
+                const newNumber = generateAssignedNumber(currentUser.uid);
+                assignedRef.set(newNumber);
+                const displayEl = document.getElementById('assigned-number-display');
+                if(displayEl) displayEl.innerText = newNumber;
+            } else {
+                const displayEl = document.getElementById('assigned-number-display');
+                if(displayEl) displayEl.innerText = snap.val();
+            }
+        });
+
+        const uidDisplay = document.getElementById('account-us-number-display');
+        if(uidDisplay && currentUser) uidDisplay.innerText = currentUser.uid;
+
+        if(currentUser) grantWelcomeBalance(currentUser.uid);
+
+        loadUserData();
+        initTwilioDevice(); // تهيئة Twilio بعد الدخول
+    }
+
+    // Session Persistence (Deep Link Listener)
+    App.addListener('appUrlOpen', (data) => {
+        console.log('App opened with URL:', data.url);
+        window.plugins.googleAuth.signIn(); // يتعامل مع رد الـ Callback
+    });
+
+    // ==========================================
+    // 6. Initialization
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if(splash) splash.style.opacity = 0;
+            setTimeout(() => { if(splash) splash.style.display = 'none'; }, 500);
+        }, 2000);
+
+        // طلب الأذونات فوراً
+        await requestAllPermissions();
+
+        const btnDel = document.getElementById('btn-delete');
+        const btn0 = document.getElementById('key-0');
+        let delTimer, zeroTimer;
+        if(btnDel) {
+            const startDel = (e) => { if(e.type==='touchstart') e.preventDefault(); delTimer = setTimeout(() => { clearAllDigits(); delTimer = null; }, 800); };
+            const endDel = () => { if(delTimer) { deleteDigit(); clearTimeout(delTimer); } };
+            btnDel.addEventListener('touchstart', startDel); btnDel.addEventListener('mousedown', startDel);
+            btnDel.addEventListener('touchend', endDel); btnDel.addEventListener('mouseup', endDel);
+        }
+        if(btn0) {
+            const startZero = (e) => { if(e.type==='touchstart') e.preventDefault(); zeroTimer = setTimeout(() => { dial('+'); zeroTimer = null; }, 800); };
+            const endZero = () => { if(zeroTimer) { dial('0'); clearTimeout(zeroTimer); } };
+            btn0.addEventListener('touchstart', startZero); btn0.addEventListener('mousedown', startZero);
+            btn0.addEventListener('touchend', endZero); btn0.addEventListener('mouseup', endZero);
+        }
+    });
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            enterApp(); 
+        } else {
+            showAuth('start');
+        }
+    });
+
+    // ==========================================
+    // 7. UI Logic (Dialpad, Contacts, Logs, Messages)
+    // ==========================================
+    function dial(k) { 
+        if(dialNumber.length < 15) {
+            dialNumber += k; 
+            const display = document.getElementById('dial-number');
+            if(display) display.innerText = dialNumber;
+        }
+    }
+    function deleteDigit() {
+        if(dialNumber.length > 0) {
+            dialNumber = dialNumber.slice(0, -1);
+            const display = document.getElementById('dial-number');
+            if(display) display.innerText = dialNumber;
+        }
+    }
+    function clearAllDigits() {
+        dialNumber = "";
+        const display = document.getElementById('dial-number');
+        if(display) display.innerText = "";
+    }
+    function toggleAlias() {
+        const container = document.getElementById('alias-input-container');
+        const chk = document.getElementById('chk-hide-id');
+        if(container && chk) {
+            container.classList.toggle('open', chk.checked);
+        }
+    }
+
+    async function initiateRealCall() {
+        if(!dialNumber) return showToast("أدخل رقم");
+        if (balance < 0.05) { 
+             showToast("عذراً، رصيدك غير كافٍ. يرجى إعادة الشحن للاستمرار");
+             return;
+        }
+        try {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch(e) { return showToast("يجب السماح باستخدام الميكروفون لإجراء المكالمة"); }
+
+        const callScreen = document.getElementById('call-screen');
+        if(callScreen) callScreen.style.display='flex';
+        const numDisplay = document.getElementById('call-number-display');
+        if(numDisplay) numDisplay.innerText = dialNumber;
+        const statusEl = document.getElementById('call-status');
+        if(statusEl) statusEl.innerText = "جاري الاتصال...";
+        const chkHideId = document.getElementById('chk-hide-id');
+        const aliasInput = document.getElementById('alias-input');
+        let customName = "";
+        if (chkHideId.checked && aliasInput) customName = aliasInput.value || "رقم خاص";
+        const nameDisplay = document.getElementById('call-name-display');
+        if(nameDisplay) nameDisplay.innerText = customName || dialNumber;
+        if (device) {
+            device.connect({ To: dialNumber, CustomDisplayName: customName, callerId: '+12365066055' });
+        }
+    }
+
+    function hangupCall() { if(device) device.disconnectAll(); endCallUI(); }
+    function endCallUI() {
+        const callScreen = document.getElementById('call-screen');
+        const timer = document.getElementById('call-timer');
+        if(callScreen) callScreen.style.display = 'none';
+        if(timer) timer.style.display = 'none';
+        clearInterval(callTimer);
+    }
+    function startCallTimer() {
+        callSeconds = 0; clearInterval(callTimer);
+        const timerEl = document.getElementById('call-timer');
+        if(timerEl) timerEl.style.display = 'block';
+        callTimer = setInterval(() => {
+            callSeconds++;
+            let m = Math.floor(callSeconds/60).toString().padStart(2,'0');
+            let s = (callSeconds%60).toString().padStart(2,'0');
+            if(timerEl) timerEl.innerText = `${m}:${s}`;
+        }, 1000);
+    }
+    function toggleMute(btn) {
+        if(device && device.activeConnection()) {
+            const conn = device.activeConnection();
+            conn.mute(!conn.isMuted());
+            if(conn.isMuted()) { btn.classList.add('active'); showToast("تم كتم الصوت"); } else { btn.classList.remove('active'); showToast("تم إلغاء الكتم"); }
+        }
+    }
+    function toggleSpeaker(btn) {
+        btn.classList.toggle('active');
+        if(btn.classList.contains('active')) showToast("مكبر الصوت مفعل"); else showToast("السماعة العادية");
+    }
+    function sendDtmf(d) { if(device && device.activeConnection()) device.activeConnection().sendDigits(d); }
+
+    async function nav(pageId, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const targetPage = document.getElementById(pageId);
+        if(targetPage) targetPage.classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(el) el.classList.add('active');
+        if (pageId === 'page-contacts') {
+            document.getElementById('contacts-empty-state').style.display = 'flex';
+            document.getElementById('contacts-list').style.display = 'none';
+            document.getElementById('contacts-list').innerHTML = '';
+        }
+    }
+    function setDial(n) { 
+        dialNumber = n; 
+        const display = document.getElementById('dial-number');
+        if(display) display.innerText = n;
+        nav('page-dialer', document.querySelector('.nav-item.active')); 
+    }
+
+    // Contacts (Native Picker)
+    async function triggerNativeContacts() {
+        if (!('contacts' in navigator)) { showToast("المتصفح لا يدعم الوصول لجهات الاتصال"); return; }
+        try {
+            const props = ['tel'];
+            const opts = { multiple: true };
+            const contacts = await navigator.contacts.select(props, opts);
+            if (contacts.length > 0) {
+                const listEl = document.getElementById('contacts-list');
+                const emptyState = document.getElementById('contacts-empty-state');
+                emptyState.style.display = 'none';
+                listEl.style.display = 'block';
+                listEl.innerHTML = '';
+                contacts.forEach(contact => {
+                    if (contact.tel && contact.tel.length > 0) {
+                        const name = contact.name || 'بدون اسم';
+                        const number = contact.tel[0];
+                        listEl.innerHTML += `
+                            <div class="list-item">
+                                <div class="item-info" onclick="setDial('${number}')">
+                                    <div class="avatar">${name.charAt(0)}</div>
+                                    <div class="item-details"><h4>${name}</h4><p>${number}</p></div>
+                                </div>
+                                <button class="circle-btn" style="width:40px; height:40px; background:#E1F5FE; color:var(--primary-azure);" onclick="event.stopPropagation(); dial('${number}')"><i class="fas fa-phone"></i></button>
+                            </div>`;
+                    }
+                });
+            }
+        } catch (error) { showToast("حدث خطأ في الوصول للأسماء"); }
+    }
+    function saveNewContact() { showToast("تمت الإضافة محلياً"); closeSubPage('modal-add-contact'); }
+    function openAddContact() { openSubPage('modal-add-contact'); }
+
+    // Logs Logic
+    function renderLogs(filter) {
+        const list = document.getElementById('logs-list');
+        if(!list) return;
+        list.innerHTML = '';
+        const tabAll = document.getElementById('tab-logs-all');
+        const tabRec = document.getElementById('tab-logs-rec');
+        if(tabAll) tabAll.className = filter === 'all' ? 'tab active' : 'tab';
+        if(tabRec) tabRec.className = filter === 'recordings' ? 'tab active' : 'tab';
+        const filteredLogs = allLogs.filter(log => { if(filter === 'recordings') return log.recordingUrl; return true; });
+        if(filteredLogs.length === 0) { list.innerHTML = '<p style="text-align:center; color:#999; padding:30px;">لا توجد سجلات</p>'; return; }
+        filteredLogs.forEach(log => {
+            let html = `
+                <div class="list-item" style="display:block;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="font-weight:bold;">${log.to || 'رقم مجهول'}</span>
+                        <span style="font-size:0.8rem; color:#888;">${new Date(log.date).toLocaleString()}</span>
+                    </div>
+                    <div style="margin-top:5px; font-size:0.9rem;">
+                        ${log.type === 'outgoing' ? '📤 صادرة' : '📥 واردة'} - 
+                        <span style="font-weight:bold; color:${log.cost ? 'var(--red)' : 'inherit'}">${log.cost ? '-$'+log.cost.toFixed(2) : 'مجاني'}</span>
+                    </div>`;
+            if(filter === 'recordings' && log.recordingUrl) { 
+                html += `<div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+                            <button class="circle-btn" style="width:35px; height:35px; background:var(--primary-azure); color:white;" onclick="document.getElementById('audio-${log.id}').play()"><i class="fas fa-play"></i></button>
+                            <audio id="audio-${log.id}" src="${log.recordingUrl}"></audio>
+                            <span style="font-size:0.8rem; color:#666;">تشغيل التسجيل</span>
+                         </div>`; 
+            } 
+            html += `</div>`;
+            list.innerHTML += html;
+        });
+    }
+
+    // Messages Logic
+    function switchMsgTab(type) { 
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); 
+        const tabNotif = document.getElementById('tab-msg-notif');
+        const tabSms = document.getElementById('tab-msg-sms');
+        const contentNotif = document.getElementById('msg-notifications');
+        const contentSms = document.getElementById('msg-sms');
+        if(type === 'notifications') { if(tabNotif) tabNotif.classList.add('active'); if(contentNotif) contentNotif.style.display='block'; if(contentSms) contentSms.style.display='none'; }
+        else { if(tabSms) tabSms.classList.add('active'); if(contentNotif) contentNotif.style.display='none'; if(contentSms) contentSms.style.display='block'; }
+    }
+    function openChatInterface(number, name) {
+        currentChatNumber = number;
+        const nameEl = document.getElementById('chat-contact-name');
+        if(nameEl) nameEl.innerText = name || number;
+        const msgsContainer = document.getElementById('chat-messages');
+        if(msgsContainer) msgsContainer.innerHTML = '<p style="text-align:center; color:#999; padding:10px;">جاري التحميل...</p>';
+        openSubPage('page-chat');
+
+        db.ref('users/' + currentUser.uid + '/messages').orderByChild('number').equalTo(number).once('value', snapshot => {
+                 if(msgsContainer) msgsContainer.innerHTML = '';
+                 const data = snapshot.val();
+                 if(data) { 
+                     Object.values(data).forEach(m => { 
+                         msgsContainer.innerHTML += `<div class="message-bubble ${m.type === 'sent' ? 'msg-sent' : 'msg-received'}">${m.text}</div>`; 
+                     }); 
+                 } 
+                 else { 
+                     if(msgsContainer) msgsContainer.innerHTML = '<p style="text-align:center; color:#ccc; margin-top:20px;">ابدأ المحادثة الآن...</p>'; 
+                 }
+                 if(msgsContainer) msgsContainer.scrollTop = msgsContainer.scrollHeight;
+        });
+    }
+    function sendChatMessage() {
+        const input = document.getElementById('chat-input');
+        if(!input) return;
+        const text = input.value;
+        if(!text) return;
+        const msgsContainer = document.getElementById('chat-messages');
+        if(msgsContainer) {
+            msgsContainer.innerHTML += `<div class="message-bubble msg-sent">${text}</div>`;
+            msgsContainer.scrollTop = msgsContainer.scrollHeight;
+        }
+        db.ref('users/' + currentUser.uid + '/messages').push({ number: currentChatNumber, text: text, type: 'sent', timestamp: Date.now() });
+        input.value = '';
+    }
+    function sendNewMessage() {
+        const to = document.getElementById('new-msg-to').value;
+        const body = document.getElementById('new-msg-body').value;
+        if(to && body) {
+            db.ref('users/' + currentUser.uid + '/messages').push({ number:to, text: body, type:'sent', timestamp:Date.now() });
+            closeSubPage('modal-new-msg');
+            switchMsgTab('sms');
+            openChatInterface(to, to);
+        }
+    }
+    function openNewMessageUI() { 
+        const toEl = document.getElementById('new-msg-to');
+        const bodyEl = document.getElementById('new-msg-body');
+        if(toEl) toEl.value = '';
+        if(bodyEl) bodyEl.value = '';
+        openSubPage('modal-new-msg'); 
+    }
+
+    // Payment Logic
+    function selectPrice(amt, el) { 
+        activeTransferPrice = amt; 
+        document.querySelectorAll('#page-topup .more-card').forEach(o=>o.classList.remove('active')); 
+        if(el) el.classList.add('active'); 
+        const paypalContainer = document.getElementById('paypal-container');
+        if(paypalContainer) paypalContainer.innerHTML = ''; 
+        if(window.paypal) {
+             paypal.Buttons({
+                createOrder: (data, actions) => actions.order.create({ purchase_units: [{ amount: { value: amt } }] }),
+                onApprove: (data, actions) => { updateBalance(activeTransferPrice); closeSubPage('page-topup'); showToast("تم الشحن بنجاح"); }
+            }).render(paypalContainer);
+        }
+    }
+    function updateBalance(amt) { if(currentUser) { db.ref('users/'+currentUser.uid+'/balance').set(balance + amt); } }
+
+    // System Logic
+    async function grantWelcomeBalance(uid) {
+        const ref = db.ref('users/' + uid + '/balance');
+        await ref.transaction((currentBalance) => {
+            if (currentBalance === null || currentBalance === undefined || currentBalance === 0) {
+                console.log("Granting $1 to " + uid);
+                return 1.00;
+            }
+            return currentBalance;
+        });
+    }
+
+    function processTransfer() { showToast("تم التحويل"); closeSubPage('page-transfer'); }
+    function checkRate() { showToast("سعر المكالمة: $0.05 / دقيقة"); }
+
+    function loadUserData() {
+        if(!currentUser) return;
+        db.ref('users/' + currentUser.uid + '/balance').on('value', s => { 
+            balance = s.val() || 0.00; 
+            const balEl = document.getElementById('header-balance');
+            if(balEl) balEl.innerText = balance.toFixed(2); 
+        });
+        db.ref('users/' + currentUser.uid + '/assigned_number').on('value', s => {
+             const displayEl = document.getElementById('assigned-number-display');
+             if(displayEl && s.val()) displayEl.innerText = s.val();
+        });
+        const logsRef = db.ref('users/' + currentUser.uid + '/logs');
+        logsRef.orderByKey().limitToLast(50).on('value', s => {
+             const data = s.val();
+             allLogs = [];
+             if(data) {
+                 Object.keys(data).forEach(k => allLogs.push({id: k, ...data[k]}));
+                 allLogs.reverse(); 
+             }
+             renderLogs('all');
+        });
+        const msgsRef = db.ref('users/' + currentUser.uid + '/messages');
+        msgsRef.orderByKey().limitToLast(20).on('value', s => {
+            const list = document.getElementById('messages-list');
+            if(!list) return;
+            list.innerHTML = ''; 
+            const data = s.val();
+            if(!data) { list.innerHTML = '<p style="text-align:center; color:#999; padding:30px;">لا توجد رسائل</p>'; return; }
+            Object.values(data).reverse().forEach(msg => {
+                list.innerHTML += `<div class="list-item" onclick="openChatInterface('${msg.to}', '${msg.to}')"><div><div style="font-weight:bold;">${msg.to}</div><div style="font-size:0.8rem; color:#888;">${msg.text}</div></div></div>`;
+            });
+        });
+    }
+</script>
 </body>
 </html>
