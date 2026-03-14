@@ -25,9 +25,6 @@
     <script src="https://unpkg.com/@capacitor/permissions@5/dist/permissions.js"></script>
     <script src="https://unpkg.com/@capacitor/local-notifications@5/dist/local-notifications.js"></script>
 
-    <!-- Main Application Logic -->
-    <script src="script.js"></script>
-
     <style>
         :root {
             --primary-azure: #0078D7;
@@ -590,7 +587,7 @@
             document.getElementById('auth-start').style.display = 'none';
             document.querySelectorAll('.auth-container').forEach(c => c.style.display = 'none');
             document.getElementById('main-interface').classList.add('visible');
-
+            
             fetch('/setup-new-user', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -759,7 +756,7 @@
 // داخل دالة enterApp أو بعد نجاح تسجيل الدخول
 async function enterApp() {
     // ... الكود القديم ...
-
+    
     // استدعاء السيرفر للحصول على الرصيد والرقم المجاني
     try {
         await fetch(`${REPLIT_BACKEND_URL}/setup-user`, {
@@ -770,7 +767,7 @@ async function enterApp() {
     } catch (e) {
         console.log("Setup failed or network issue", e);
     }
-
+    
     // ... باقي الكود ...
     }
     // مراقب حالة المستخدم
