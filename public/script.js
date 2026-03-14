@@ -55,17 +55,19 @@ async function handleLogin() {
             body: JSON.stringify({ email, password: pass })
         });
         const data = await res.json();
+        console.log("Login response:", data);
         if (data.ok) {
             localStorage.token = data.token;
             localStorage.uid = data.uid;
-            currentUser = { uid: data.uid };
+            currentUser = { uid: data.uid, email: data.email };
             balance = data.balance || 0;
             enterMainApp();
-            showToast("تم الدخول بنجاح");
+            showToast("تم الدخول بنجاح!");
         } else {
             showToast(data.error || "فشل الدخول");
         }
     } catch (e) {
+        console.error("Login error:", e);
         showToast("خطأ في الاتصال بالخادم");
     }
 }
@@ -77,6 +79,7 @@ async function handleRegister() {
 
     if (!email || !pass || !conf) return showToast("أكمل جميع الحقول");
     if (pass !== conf) return showToast("كلمات المرور غير متطابقة");
+    if (pass.length < 6) return showToast("كلمة المرور قصيرة جداً (6 أحرف على الأقل)");
 
     try {
         const res = await fetch('/api/register', {
@@ -85,15 +88,20 @@ async function handleRegister() {
             body: JSON.stringify({ email, password: pass })
         });
         const data = await res.json();
+        console.log("Register response:", data);
         if (data.ok) {
             showToast("تم التسجيل! الآن سجل دخول");
-            showAuth('login');
-            document.getElementById('login-email').value = email;
+            setTimeout(() => {
+                showAuth('login');
+                document.getElementById('login-email').value = email;
+                document.getElementById('login-pass').value = '';
+            }, 500);
         } else {
             showToast(data.error || "فشل التسجيل");
         }
     } catch (e) {
-        showToast("خطأ في الاتصال");
+        console.error("Register error:", e);
+        showToast("خطأ في الاتصال بالخادم");
     }
 }
 
