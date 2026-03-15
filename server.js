@@ -39,7 +39,16 @@ const dbGet = (sql, params = []) => {
 // Initialize tables
 (async () => {
   try {
-    await dbRun(`CREATE TABLE IF NOT EXISTS users (
+    // Drop old tables if they exist (fresh start)
+    try {
+      await dbRun("DROP TABLE IF EXISTS users");
+      await dbRun("DROP TABLE IF EXISTS calls");
+    } catch (e) {
+      console.log("No old tables to drop");
+    }
+
+    // Create fresh tables with correct schema
+    await dbRun(`CREATE TABLE users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
@@ -47,7 +56,7 @@ const dbGet = (sql, params = []) => {
       is_new_user INTEGER DEFAULT 1
     )`);
     
-    await dbRun(`CREATE TABLE IF NOT EXISTS calls (
+    await dbRun(`CREATE TABLE calls (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       userId INTEGER,
       toNumber TEXT,
@@ -56,7 +65,7 @@ const dbGet = (sql, params = []) => {
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
     
-    console.log("✅ Database tables initialized");
+    console.log("✅ Database tables created successfully");
   } catch (e) {
     console.error("Database init error:", e);
   }
