@@ -39,16 +39,8 @@ const dbGet = (sql, params = []) => {
 // Initialize tables
 (async () => {
   try {
-    // Drop old tables if they exist (fresh start)
-    try {
-      await dbRun("DROP TABLE IF EXISTS users");
-      await dbRun("DROP TABLE IF EXISTS calls");
-    } catch (e) {
-      console.log("No old tables to drop");
-    }
-
-    // Create fresh tables with correct schema
-    await dbRun(`CREATE TABLE users (
+    // Create tables if they don't exist
+    await dbRun(`CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
@@ -56,12 +48,22 @@ const dbGet = (sql, params = []) => {
       is_new_user INTEGER DEFAULT 1
     )`);
     
-    await dbRun(`CREATE TABLE calls (
+    await dbRun(`CREATE TABLE IF NOT EXISTS calls (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       userId INTEGER,
       toNumber TEXT,
       duration INTEGER,
       cost REAL,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+    
+    await dbRun(`CREATE TABLE IF NOT EXISTS sms (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER,
+      toNumber TEXT,
+      message TEXT,
+      direction TEXT,
+      cost REAL DEFAULT 0.05,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
     
@@ -295,6 +297,65 @@ app.post("/api/firebase-auth", async (req, res) => {
   } catch (e) {
     console.error("Firebase Auth error:", e);
     res.json({ ok: false, error: "خطأ في المصادقة: " + e.message });
+  }
+});
+
+// SMS endpoints
+app.post("/api/sms/send", authenticate, async (req, res) => {
+  try {
+    const { to, message } = req.body;
+    if (!to || !message) {
+      return res.json({ ok: false, error: "أدخل الرقم والرسالة" });
+    }
+
+    const user = await dbGet("SELECT balance FROM users WHERE id = ?", [req.userId]);
+    if (!user || user.balance < 0.05) {
+      return res.json({ ok: false, error: "الرصيد غير كافٍ" });
+    }
+
+    try {
+      // Send SMS via Twilio
+      const sms = await twilioClient.messages.create({
+        body: message,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: to
+      });
+
+      // Deduct balance and log SMS
+      await dbRun("UPDATE users SET balance = balance - 0.05 WHERE id = ?", [req.userId]);
+      await dbRun(
+        "INSERT INTO sms (userId, toNumber, message, direction, cost) VALUES (?, ?, ?, ?, 0.05)",
+        [req.userId, to, message, "outgoing"]
+      );
+
+      res.json({ ok: true, sid: sms.sid });
+    } catch (twilioErr) {
+      console.error("Twilio SMS error:", twilioErr);
+      res.json({ ok: false, error: "خطأ في إرسال الرسالة: " + twilioErr.message });
+    }
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+app.get("/api/sms/list", authenticate, async (req, res) => {
+  try {
+    const dbAll = (sql, params = []) => {
+      return new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows || []);
+        });
+      });
+    };
+
+    const messages = await dbAll(
+      "SELECT toNumber, message, direction, timestamp FROM sms WHERE userId = ? ORDER BY timestamp DESC LIMIT 100",
+      [req.userId]
+    );
+    res.json({ ok: true, messages });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
   }
 });
 

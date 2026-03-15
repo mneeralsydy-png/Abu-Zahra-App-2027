@@ -290,7 +290,7 @@
                 <div class="tab" id="tab-contacts-fav" onclick="renderContacts('fav')">المفضلة</div>
             </div>
             <div id="contacts-list" style="padding-top:10px;"></div>
-            <div class="tab-fab" onclick="openAddContact()"><i class="fas fa-plus"></i></div>
+            <div class="tab-fab" onclick="requestContactsPermission()"><i class="fas fa-sync"></i></div>
         </div>
 
         <!-- صفحة السجلات (Logs) -->
@@ -361,6 +361,16 @@
     </div>
 
     <!-- --- الصفحات الفرعية والمودالز --- -->
+    <!-- Modal: New SMS Message -->
+    <div id="modal-new-msg" class="sub-page">
+        <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('modal-new-msg')"></i> <span>رسالة جديدة</span></div>
+        <div class="sub-content">
+            <input type="tel" id="new-msg-number" class="form-input" placeholder="رقم المستقبل (مثال: +966500000000)" style="margin-bottom:15px;">
+            <textarea id="new-msg-text" class="form-input" placeholder="نص الرسالة" style="height:150px; resize:none; margin-bottom:15px;"></textarea>
+            <button class="btn-block" onclick="sendNewMessage()">إرسال الرسالة</button>
+        </div>
+    </div>
+
     <div id="page-topup" class="sub-page">
         <div class="sub-header"><i class="fas fa-arrow-right" onclick="closeSubPage('page-topup')"></i> <span>شحن الرصيد</span></div>
         <div class="sub-content">

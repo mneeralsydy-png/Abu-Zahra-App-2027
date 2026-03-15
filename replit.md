@@ -28,6 +28,29 @@ Preferred communication style: Simple, everyday language.
   - Works on both touch devices and mouse
   - Uses touchstart/touchend and mousedown/mouseup events for cross-platform support
 
+### 3. SMS Functionality (Batch 2)
+- **Status**: ✅ Implemented
+- **Features**:
+  - Send SMS via Twilio Programmable SMS API
+  - Cost: $0.05 per message (deducted from user balance)
+  - Backend endpoints: `/api/sms/send` (POST), `/api/sms/list` (GET)
+  - Full message history with timestamps and direction (📤 sent / 📥 received)
+  - Modal UI for composing new messages
+  - Auto-saves messages to database (SQLite `sms` table)
+  - Validates recipient number and message content
+  - Shows error if balance insufficient
+
+### 4. Phone Contacts Integration (Batch 2)
+- **Status**: ✅ Implemented (Ready for mobile)
+- **Features**:
+  - `requestContactsPermission()` function to fetch native phone contacts
+  - Uses Capacitor Contacts API on mobile (Android/iOS)
+  - Displays up to 50 contacts in UI with name and phone number
+  - Click contact to auto-dial the number
+  - Sync button (🔄) in contacts tab to refresh from device
+  - Fallback message if contacts unavailable
+  - Will request native permissions automatically on mobile
+
 ## System Architecture
 
 ### Backend (Node.js + Express)

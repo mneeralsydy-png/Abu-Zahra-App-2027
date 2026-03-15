@@ -365,6 +365,49 @@ function saveNewContact() {
     }
 }
 
+// =============== PHONE CONTACTS (Capacitor) ===============
+
+async function requestContactsPermission() {
+    try {
+        // Check if Capacitor Contacts is available
+        if (typeof window.CapacitorContacts !== 'undefined') {
+            const contacts = await window.CapacitorContacts.getContacts();
+            displayNativeContacts(contacts.contacts || []);
+        } else {
+            showToast("Capacitor Contacts not available on this platform");
+        }
+    } catch (e) {
+        console.error("Contacts error:", e);
+        showToast("خطأ في الوصول لجهات الاتصال: " + e.message);
+    }
+}
+
+function displayNativeContacts(contacts) {
+    const list = document.getElementById('contacts-list');
+    if (!list) return;
+
+    if (!contacts || contacts.length === 0) {
+        list.innerHTML = '<p style="text-align:center;padding:20px;color:#999;">لا توجد جهات اتصال</p>';
+        return;
+    }
+
+    list.innerHTML = contacts.slice(0, 50).map((contact, i) => {
+        const name = contact.name || "Unknown";
+        const phone = contact.phones?.[0]?.number || "---";
+        return `
+            <div class="list-item" onclick="setDial('${phone}')">
+                <div class="item-info">
+                    <div class="avatar">${name.charAt(0).toUpperCase()}</div>
+                    <div class="item-details">
+                        <h4>${name}</h4>
+                        <p>${phone}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 function renderContacts(type) {
     if (!currentUser || !db) return;
 
@@ -454,39 +497,76 @@ function openNewMessageUI() {
 }
 
 function switchMsgTab(tab) {
-    document.querySelectorAll('.msg-tab').forEach(el => el.classList.remove('active'));
-    document.getElementById('tab-' + tab)?.classList.add('active');
-
-    const smsPanel = document.getElementById('sms-messages');
-    const notifPanel = document.getElementById('notifications');
+    const smsPanel = document.getElementById('msg-sms');
+    const notifPanel = document.getElementById('msg-notifications');
 
     if (tab === 'sms') {
         if (smsPanel) smsPanel.style.display = 'block';
         if (notifPanel) notifPanel.style.display = 'none';
+        loadSMSMessages();
     } else {
         if (smsPanel) smsPanel.style.display = 'none';
         if (notifPanel) notifPanel.style.display = 'block';
     }
 }
 
-function sendNewMessage() {
+async function loadSMSMessages() {
+    try {
+        const res = await fetch('/api/sms/list', {
+            headers: { Authorization: `Bearer ${localStorage.token}` }
+        });
+        const data = await res.json();
+        const list = document.getElementById('messages-list');
+        if (!list) return;
+
+        if (!data.ok || !data.messages || data.messages.length === 0) {
+            list.innerHTML = '<p style="text-align:center;padding:20px;color:#999;">لا توجد رسائل</p>';
+            return;
+        }
+
+        list.innerHTML = data.messages.map(msg => `
+            <div style="padding:12px;border-bottom:1px solid #eee;">
+                <div><strong>${msg.toNumber}</strong></div>
+                <div style="font-size:0.9rem; color:#333; margin:5px 0;">${msg.message}</div>
+                <div style="font-size:0.8rem;color:#888;">
+                    ${msg.direction === 'outgoing' ? '📤' : '📥'} • ${new Date(msg.timestamp).toLocaleString('ar-SA')}
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error("Load SMS error:", e);
+    }
+}
+
+async function sendNewMessage() {
     const to = document.getElementById('new-msg-number')?.value || '';
     const text = document.getElementById('new-msg-text')?.value || '';
 
     if (!to || !text) return showToast("أكمل الحقول");
-    if (!currentUser || !db) return;
 
-    db.ref('users/' + currentUser.uid + '/messages').push({
-        number: to,
-        text: text,
-        type: 'sent',
-        date: Date.now(),
-        cost: 0.05
-    });
-
-    updateBalance(-0.05);
-    showToast("تم إرسال الرسالة");
-    closeSubPage('modal-new-msg');
+    try {
+        const res = await fetch('/api/sms/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.token}`
+            },
+            body: JSON.stringify({ to, message: text })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            showToast("تم إرسال الرسالة!");
+            closeSubPage('modal-new-msg');
+            document.getElementById('new-msg-number').value = '';
+            document.getElementById('new-msg-text').value = '';
+            loadSMSMessages();
+        } else {
+            showToast(data.error || "فشل الإرسال");
+        }
+    } catch (e) {
+        console.error("Send SMS error:", e);
+        showToast("خطأ في الإرسال");
+    }
 }
 
 function openChatInterface(num, name) {
