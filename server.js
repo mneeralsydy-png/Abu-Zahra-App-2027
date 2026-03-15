@@ -359,6 +359,81 @@ app.get("/api/sms/list", authenticate, async (req, res) => {
   }
 });
 
+// Fetch call recordings from Twilio
+app.get("/api/recordings", authenticate, async (req, res) => {
+  try {
+    const user = await dbGet("SELECT id FROM users WHERE id = ?", [req.userId]);
+    if (!user) return res.json({ ok: false, error: "User not found" });
+
+    // Fetch calls with recordings from Twilio
+    const calls = await twilioClient.calls.list({ limit: 50 });
+    const recordings = [];
+
+    for (const call of calls) {
+      const callRecordings = await twilioClient.recordings.list({
+        callSid: call.sid
+      });
+
+      for (const rec of callRecordings) {
+        recordings.push({
+          callSid: call.sid,
+          recordingSid: rec.sid,
+          duration: rec.duration,
+          dateCreated: rec.dateCreated,
+          url: `https://api.twilio.com${rec.uri.replace('.json', '.wav')}`
+        });
+      }
+    }
+
+    res.json({ ok: true, recordings });
+  } catch (e) {
+    console.error("Recordings error:", e);
+    res.json({ ok: false, error: "خطأ في جلب التسجيلات: " + e.message });
+  }
+});
+
+// Top-up balance endpoint
+app.post("/api/topup", authenticate, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (!amount || amount <= 0) {
+      return res.json({ ok: false, error: "مبلغ غير صحيح" });
+    }
+
+    // Add balance (payment already processed by PayPal on client)
+    await dbRun("UPDATE users SET balance = balance + ? WHERE id = ?", [amount, req.userId]);
+    const user = await dbGet("SELECT balance FROM users WHERE id = ?", [req.userId]);
+
+    res.json({ ok: true, newBalance: user.balance });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// Get user info (balance, email, etc.)
+app.get("/api/user-info", authenticate, async (req, res) => {
+  try {
+    const user = await dbGet("SELECT id, email, balance FROM users WHERE id = ?", [req.userId]);
+    if (!user) {
+      return res.json({ ok: false, error: "User not found" });
+    }
+
+    // Generate a virtual US Twilio number for display
+    // Format: +1822-XXXX-XXX (based on user ID)
+    const virtualNumber = `+1822${String(user.id).padStart(7, '0')}`;
+
+    res.json({
+      ok: true,
+      uid: user.id,
+      email: user.email,
+      balance: user.balance,
+      virtualNumber: virtualNumber
+    });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });

@@ -51,6 +51,40 @@ Preferred communication style: Simple, everyday language.
   - Fallback message if contacts unavailable
   - Will request native permissions automatically on mobile
 
+### 5. Twilio Recordings (Batch 3)
+- **Status**: ✅ Implemented
+- **Features**:
+  - Backend endpoint: `/api/recordings` (GET) - fetches call recordings from Twilio API
+  - "التسجيلات" (Recordings) tab in call logs shows all recordings
+  - Each recording displays: Call SID, duration, date/time, audio player
+  - Audio player controls for listening to WAV files
+  - Shows message if no recordings available
+  - Works with Twilio Voice SDK recorded calls
+
+### 6. Payment Gateway Integration (Batch 3)
+- **Status**: ✅ Implemented
+- **Features**:
+  - PayPal integration fully connected to backend
+  - Backend endpoint: `/api/topup` (POST) - processes payment and updates balance
+  - User selects package amount ($0.99, $4.99, $9.99, $24.99, $49.99)
+  - PayPal popup handles payment processing
+  - On successful payment, balance auto-updates in database
+  - Header balance reflects new total instantly
+  - Fallback "محاكاة الدفع" (Demo Payment) button when PayPal unavailable
+  - Cost deducted from balance for all services (calls, SMS)
+
+### 7. My Account Page (حسابي) - Batch 3
+- **Status**: ✅ Implemented
+- **Features**:
+  - Backend endpoint: `/api/user-info` (GET) - fetches user profile
+  - Displays user's unique UID (numbered account ID)
+  - Shows user's email address
+  - Virtual US Twilio number (Format: +1822-XXXXXXX based on UID)
+  - Current available balance in large green text
+  - Clean profile card UI with all information
+  - Auto-loads when opening "حسابي" page
+  - Real-time balance updates after payments
+
 ## System Architecture
 
 ### Backend (Node.js + Express)

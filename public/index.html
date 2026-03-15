@@ -385,7 +385,7 @@
             </div>
             <div id="paypal-container" style="min-height:50px; margin-top:20px;"></div>
             <div id="demo-pay" style="display:none; text-align:center; margin-top:20px;">
-                <button class="btn-block" style="background:#FF9800;" onclick="simulatePay()">محاكاة الدفع</button>
+                <button class="btn-block" style="background:#FF9800;" onclick="processPayment(activeTransferPrice)">محاكاة الدفع</button>
             </div>
         </div>
     </div>
@@ -419,8 +419,14 @@
                 <p style="margin-bottom:10px; color:#666;">رقم الحساب (UID)</p>
                 <p id="account-uid-display" style="font-family:monospace; background:#f0f0f0; padding:10px; border-radius:5px; user-select:text;">...</p>
                 <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-                <p style="margin-bottom:5px; color:#666;">رقمك الأمريكي الوهمي</p>
+                <p style="margin-bottom:5px; color:#666;">البريد الإلكتروني</p>
+                <p id="account-email-display" style="font-family:monospace; background:#f0f0f0; padding:10px; border-radius:5px;">...</p>
+                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+                <p style="margin-bottom:5px; color:#666;">الرقم الأمريكي الوهمي</p>
                 <h3 id="account-us-number-display" style="color:var(--green);">...</h3>
+                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+                <p style="margin-bottom:5px; color:#666;">الرصيد المتاح</p>
+                <h3 id="account-balance-display" style="color:var(--primary-azure); font-size:2rem;">$0.00</h3>
             </div>
         </div>
     </div>

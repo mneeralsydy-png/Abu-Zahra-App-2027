@@ -474,7 +474,8 @@ function renderLogs(type) {
         let filtered = logs;
 
         if (type === 'recordings') {
-            filtered = logs.filter(l => l.recorded);
+            loadRecordings();
+            return;
         }
 
         list.innerHTML = filtered.map(l => `
@@ -487,6 +488,37 @@ function renderLogs(type) {
             </div>
         `).join('');
     });
+}
+
+async function loadRecordings() {
+    try {
+        const res = await fetch('/api/recordings', {
+            headers: { Authorization: `Bearer ${localStorage.token}` }
+        });
+        const data = await res.json();
+        const list = document.getElementById('logs-list');
+        if (!list) return;
+
+        if (!data.ok || !data.recordings || data.recordings.length === 0) {
+            list.innerHTML = '<p style="text-align:center;padding:20px;color:#999;">لا توجد تسجيلات</p>';
+            return;
+        }
+
+        list.innerHTML = data.recordings.map(rec => `
+            <div style="padding:12px;border-bottom:1px solid #eee;">
+                <div><strong>Call: ${rec.callSid.substring(0, 10)}...</strong></div>
+                <div style="font-size:0.85rem;color:#888;">
+                    ⏱️ ${rec.duration} ثانية • ${new Date(rec.dateCreated).toLocaleString('ar-SA')}
+                </div>
+                <audio style="width:100%; margin-top:8px;" controls>
+                    <source src="${rec.url}" type="audio/wav">
+                </audio>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error("Load recordings error:", e);
+        showToast("خطأ في تحميل التسجيلات");
+    }
 }
 
 // =============== MESSAGES ===============
@@ -566,6 +598,66 @@ async function sendNewMessage() {
     } catch (e) {
         console.error("Send SMS error:", e);
         showToast("خطأ في الإرسال");
+    }
+}
+
+// =============== ACCOUNT PAGE ===============
+
+async function loadAccountInfo() {
+    try {
+        const res = await fetch('/api/user-info', {
+            headers: { Authorization: `Bearer ${localStorage.token}` }
+        });
+        const data = await res.json();
+        if (data.ok) {
+            document.getElementById('account-uid-display').innerText = `#${data.uid}`;
+            document.getElementById('account-us-number-display').innerText = data.virtualNumber;
+            document.getElementById('account-email-display').innerText = data.email;
+            document.getElementById('account-balance-display').innerText = `$${data.balance.toFixed(2)}`;
+        }
+    } catch (e) {
+        console.error("Load account info error:", e);
+    }
+}
+
+function openSubPage(pageId) {
+    const page = document.getElementById(pageId);
+    if (!page) return;
+    page.style.display = 'flex';
+    
+    // Load account info when opening account page
+    if (pageId === 'page-account') {
+        loadAccountInfo();
+    }
+}
+
+// =============== PAYMENT GATEWAY ===============
+
+async function processPayment(amount) {
+    try {
+        const res = await fetch('/api/topup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.token}`
+            },
+            body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            balance = data.newBalance;
+            document.getElementById('header-balance').innerText = balance.toFixed(2);
+            showToast(`تم الشحن بنجاح! الرصيد الجديد: $${balance.toFixed(2)}`);
+            closeSubPage('page-topup');
+            return true;
+        } else {
+            showToast(data.error || "فشل الشحن");
+            return false;
+        }
+    } catch (e) {
+        console.error("Payment error:", e);
+        showToast("خطأ في معالجة الدفع");
+        return false;
     }
 }
 
