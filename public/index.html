@@ -213,6 +213,10 @@
             <input type="email" id="login-email" class="form-input" placeholder="البريد الإلكتروني">
             <input type="password" id="login-pass" class="form-input" placeholder="كلمة المرور">
             <button class="btn-block" onclick="handleLogin()">دخول</button>
+            <div style="text-align: center; margin: 20px 0; color: #999; font-size: 0.9rem;">أو</div>
+            <button class="btn-block" style="background: #DB4437; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="handleGoogleAuth()">
+                <i class="fab fa-google"></i> تسجيل عبر Google
+            </button>
             <div class="btn-back" onclick="showAuth('welcome')">الرجوع</div>
         </div>
     </div>
@@ -269,7 +273,7 @@
                 <div class="key" onclick="dial('4')">4<sub>GHI</sub></div><div class="key" onclick="dial('5')">5<sub>JKL</sub></div><div class="key" onclick="dial('6')">6<sub>MNO</sub></div>
                 <div class="key" onclick="dial('7')">7<sub>PQRS</sub></div><div class="key" onclick="dial('8')">8<sub>TUV</sub></div><div class="key" onclick="dial('9')">9<sub>WXYZ</sub></div>
                 <div class="key" onclick="dial('*')">*</div>
-                <div class="key" id="key-0">0<sub>+</sub></div>
+                <div class="key" id="key-0" onclick="dial('0')">0<sub>+</sub></div>
                 <div class="key" onclick="dial('#')">#</div>
             </div>
             <div class="dial-actions">

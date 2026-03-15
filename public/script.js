@@ -28,6 +28,8 @@ let activeCall = null;
 let selectedContact = null;
 let activeTransferPrice = 0.99;
 let aliasEnabled = false;
+let longPressTimer = null;
+let isLongPress = false;
 
 // =============== AUTH FUNCTIONS ===============
 
@@ -113,6 +115,34 @@ async function handleLogout() {
     }
 }
 
+async function handleGoogleAuth() {
+    try {
+        showToast("جاري تسجيل الدخول عبر Google...");
+        const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+        const user = result.user;
+        const token = await user.getIdToken();
+        const response = await fetch('/api/firebase-auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ firebaseToken: token, email: user.email, uid: user.uid, displayName: user.displayName })
+        });
+        const data = await response.json();
+        if (data.ok) {
+            localStorage.token = data.token;
+            localStorage.uid = data.uid;
+            currentUser = { uid: data.uid, email: user.email };
+            balance = data.balance || 0;
+            enterMainApp();
+            showToast("تم الدخول بنجاح!");
+        } else {
+            showToast(data.error || "فشل التحقق");
+        }
+    } catch (e) {
+        console.error("Google Auth error:", e);
+        showToast("خطأ في Google Auth: " + e.message);
+    }
+}
+
 function enterMainApp() {
     document.querySelectorAll('.auth-container').forEach(el => el.style.display = 'none');
     document.getElementById('main-interface').classList.add('visible');
@@ -159,7 +189,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const delBtn = document.getElementById('btn-delete');
     if (delBtn) delBtn.addEventListener('click', deleteDigit);
     const key0 = document.getElementById('key-0');
-    if (key0) key0.addEventListener('click', () => dial('0'));
+    if (key0) {
+        let touchStartTime = 0;
+        key0.addEventListener('touchstart', () => { touchStartTime = Date.now(); });
+        key0.addEventListener('touchend', () => {
+            const touchDuration = Date.now() - touchStartTime;
+            if (touchDuration >= 500) {
+                dialNumber += '+';
+                updateDialDisplay();
+            } else {
+                dial('0');
+            }
+        });
+        key0.addEventListener('mousedown', () => { touchStartTime = Date.now(); });
+        key0.addEventListener('mouseup', () => {
+            const touchDuration = Date.now() - touchStartTime;
+            if (touchDuration >= 500) {
+                dialNumber += '+';
+                updateDialDisplay();
+            }
+        });
+    }
 });
 
 function toggleAlias() {

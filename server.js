@@ -266,6 +266,38 @@ app.get("/api/token", authenticate, async (req, res) => {
   }
 });
 
+// Firebase Authentication Endpoint
+app.post("/api/firebase-auth", async (req, res) => {
+  try {
+    const { firebaseToken, email, uid, displayName } = req.body;
+    if (!firebaseToken || !email) {
+      return res.json({ ok: false, error: "بيانات ناقصة" });
+    }
+
+    // Check if user exists, if not create them
+    let user = await dbGet("SELECT * FROM users WHERE email = ?", [email]);
+    
+    if (!user) {
+      // Create new user from Firebase
+      await dbRun(
+        "INSERT INTO users (email, password, balance, is_new_user) VALUES (?, ?, 1.0, 1)",
+        [email, "firebase_auth"]
+      );
+      user = await dbGet("SELECT * FROM users WHERE email = ?", [email]);
+    } else if (user.is_new_user === 1) {
+      // Grant $1 on first login
+      await dbRun("UPDATE users SET balance = 1.0, is_new_user = 0 WHERE id = ?", [user.id]);
+      user.balance = 1.0;
+    }
+
+    const token = jwt.sign({ id: user.id }, SECRET);
+    res.json({ ok: true, token, balance: user.balance, uid: user.id, email: user.email });
+  } catch (e) {
+    console.error("Firebase Auth error:", e);
+    res.json({ ok: false, error: "خطأ في المصادقة: " + e.message });
+  }
+});
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });

@@ -1,12 +1,32 @@
-# Private Dialer
+# Private Dialer (أبو الزهراء)
 
 ## Overview
 
-Private Dialer is a web-based phone calling application that allows users to make phone calls through Twilio's API. The app features user authentication, a balance/credit system, call history tracking, and PayPal integration for adding funds. The interface is designed in Arabic (RTL layout) and styled as a mobile-first application resembling a native phone dialer.
+Private Dialer is a professional Arabic VoIP application called "أبو الزهراء" (Abu Al-Zahra). It's a web-based phone calling application that allows users to make phone calls through Twilio's API. The app features dual authentication (email/password + Google), a balance/credit system, call history tracking, and PayPal integration for adding funds. The interface is designed in Arabic (RTL layout) and styled as a mobile-first application resembling a native phone dialer with Capacitor Android support.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Latest Features (Implemented in v1.0.2)
+
+### 1. Google Authentication
+- **Status**: ✅ Implemented
+- **Features**: 
+  - Added red Google Sign-In button to login page
+  - Uses Firebase Web SDK for browser testing
+  - Falls back to Capacitor Firebase Authentication on mobile
+  - Auto-creates user account on first Google login
+  - Grants $1.00 credit on first login
+- **Backend Endpoint**: `/api/firebase-auth` (POST) - validates Firebase token and creates/updates user
+
+### 2. Long-Press on "0" Button
+- **Status**: ✅ Implemented
+- **Features**:
+  - Press "0" for 500ms+ to input "+" symbol
+  - Quick tap shows "0" as normal
+  - Works on both touch devices and mouse
+  - Uses touchstart/touchend and mousedown/mouseup events for cross-platform support
 
 ## System Architecture
 
