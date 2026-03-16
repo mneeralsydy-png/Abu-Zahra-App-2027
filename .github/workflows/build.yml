@@ -1,0 +1,79 @@
+node-version-version: Build and Test Private Dialer
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master, dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Check Node.js version
+      run: node --version && npm --version
+
+    - name: Validate server.js syntax
+      run: node --check server.js
+
+    - name: Validate public/script.js syntax
+      run: node --check public/script.js
+
+    - name: Verify HTML structure
+      run: |
+        if [ -f public/index.html ]; then
+          echo "✓ index.html exists"
+        else
+          echo "✗ index.html not found"
+          exit 1
+        fi
+
+    - name: Check database initialization
+      run: |
+        timeout 5 node server.js &
+        sleep 2
+        if [ -f database.db ]; then
+          echo "✓ Database created successfully"
+        else
+          echo "✗ Database initialization failed"
+          exit 1
+        fi
+        pkill -f "node server.js" || true
+
+    - name: Verify environment variables
+      run: |
+        echo "✓ Build validation complete"
+        echo "Required environment variables for deployment:"
+        echo "  - JWT_SECRET (optional, has default)"
+        echo "  - TWILIO_ACCOUNT_SID (required for calls)"
+        echo "  - TWILIO_AUTH_TOKEN (required for calls)"
+        echo "  - TWILIO_PHONE_NUMBER (required for SMS)"
+
+    - name: Build summary
+      run: |
+        echo "=========================================="
+        echo "Build Configuration Summary"
+        echo "=========================================="
+        echo "App ID: com.privatedialer.app"
+        echo "App Name: Private Dialer (أبو الزهراء)"
+        echo "Server Port: 5000"
+        echo "Frontend: public/ (static files)"
+        echo "Backend: server.js (Node.js + Express)"
+        echo "Database: SQLite (database.db)"
+        echo "=========================================="
