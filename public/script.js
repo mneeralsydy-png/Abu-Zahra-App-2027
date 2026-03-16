@@ -676,19 +676,6 @@ function sendChatMessage() {
 
 // =============== PAYMENT ===============
 
-function openSubPage(page) {
-    document.getElementById(page).style.display = 'block';
-
-    if (page === 'page-topup') {
-        loadPayPalButton();
-    }
-}
-
-function closeSubPage(page) {
-    const el = document.getElementById(page);
-    if (el) el.style.display = 'none';
-}
-
 function selectPrice(price, el) {
     activeTransferPrice = price;
     document.querySelectorAll('.price-btn').forEach(b => b.classList.remove('active'));
