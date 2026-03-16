@@ -28,20 +28,22 @@ jobs:
         rm -rf android
         npx cap init "Private Dialer" "com.privatedialer.app" --web-dir public --noprompt || true
         npx cap add android
-        # مزامنة المكتبات والتأكد من تحديثها
         npx cap sync android
 
-    - name: Fix Android SDK & Gradle
+    - name: Force Update Android SDK to 36
       run: |
-        # تحديث الإصدارات لتتوافق مع متطلبات الأندرويد الحديثة
+        # تعديل ملف variables.gradle لفرض الإصدار 36
         if [ -f android/variables.gradle ]; then
-          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/g' android/variables.gradle
-          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/g' android/variables.gradle
+          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 36/g' android/variables.gradle
+          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 36/g' android/variables.gradle
+          echo "Variables updated to SDK 36"
         fi
-        # إضافة إعدادات لتسريع البناء وتقليل استهلاك الذاكرة
-        mkdir -p ~/.gradle
-        echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
-        echo "org.gradle.jvmargs=-Xmx2048m" >> ~/.gradle/gradle.properties
+        
+        # تعديل ملف build.gradle الرئيسي لرفع إصدار أداة البناء (Gradle Plugin)
+        sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.7.2/g' android/build.gradle
+        
+        # إضافة إعدادات لتجاوز فحص المكتبات المتعارضة
+        echo "android.experimental.privacySandboxSdk.enable=false" >> android/gradle.properties
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -53,7 +55,6 @@ jobs:
       run: |
         cd android
         chmod +x gradlew
-        # استخدام --no-daemon لتحسين الاستقرار في بيئة GitHub
         ./gradlew assembleDebug --no-daemon
 
     - name: Upload APK
