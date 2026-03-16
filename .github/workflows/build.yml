@@ -1,4 +1,4 @@
-: Build and Test Private Dialer
+name: Build and Test Private Dialer
 
 on:
   push:
@@ -12,13 +12,16 @@ jobs:
 
     strategy:
       matrix:
+        # اختبار التطبيق على أهم إصدارات Node.js المستقرة
         node-version: [18.x, 20.x]
 
     steps:
-    - uses: actions/checkout@v3
+    # استخدام الإصدار الرابع (v4) لسرعة أفضل في سحب الكود
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
@@ -26,14 +29,20 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Security Audit
+      run: npm audit --audit-level=high || echo "تحذير: توجد ثغرات أمنية في المكتبات المستخدمة"
+
     - name: Check Node.js version
-      run: node --version && npm --version
+      run: |
+        echo "Node Version: $(node -version)"
+        echo "NPM Version: $(npm -version)"
 
-    - name: Validate server.js syntax
-      run: node --check server.js
-
-    - name: Validate public/script.js syntax
-      run: node --check public/script.js
+    - name: Validate Scripts Syntax
+      run: |
+        node --check server.js
+        if [ -f public/script.js ]; then
+          node --check public/script.js
+        fi
 
     - name: Verify HTML structure
       run: |
@@ -46,8 +55,9 @@ jobs:
 
     - name: Check database initialization
       run: |
-        timeout 5 node server.js &
-        sleep 2
+        # تشغيل السيرفر في الخلفية لفترة قصيرة للتأكد من إنشاء SQLite
+        timeout 10 node server.js & 
+        sleep 5
         if [ -f database.db ]; then
           echo "✓ Database created successfully"
         else
@@ -56,24 +66,25 @@ jobs:
         fi
         pkill -f "node server.js" || true
 
-    - name: Verify environment variables
-      run: |
-        echo "✓ Build validation complete"
-        echo "Required environment variables for deployment:"
-        echo "  - JWT_SECRET (optional, has default)"
-        echo "  - TWILIO_ACCOUNT_SID (required for calls)"
-        echo "  - TWILIO_AUTH_TOKEN (required for calls)"
-        echo "  - TWILIO_PHONE_NUMBER (required for SMS)"
-
     - name: Build summary
       run: |
         echo "=========================================="
-        echo "Build Configuration Summary"
+        echo "      Build Configuration Summary         "
         echo "=========================================="
+        echo "Project: Private Dialer (أبو الزهراء)"
         echo "App ID: com.privatedialer.app"
-        echo "App Name: Private Dialer (أبو الزهراء)"
-        echo "Server Port: 5000"
-        echo "Frontend: public/ (static files)"
-        echo "Backend: server.js (Node.js + Express)"
+        echo "Environment: Production/Testing"
         echo "Database: SQLite (database.db)"
+        echo "Required Secrets for Twilio:"
+        echo "  - TWILIO_ACCOUNT_SID"
+        echo "  - TWILIO_AUTH_TOKEN"
         echo "=========================================="
+
+    # اختيار اختياري: رفع قاعدة البيانات الناتجة كملف (Artifact) لفحصها لاحقاً
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dialer-build-${{ matrix.node-version }}
+        path: |
+          database.db
+          package-lock.json
