@@ -31,7 +31,7 @@ jobs:
 
     - name: Force Upgrade SDK & Plugin
       run: |
-        # تحديث متغيرات الإصدارات ورفع minSdkVersion إلى 23 لحل الخطأ الأخير
+        # تحديث المتغيرات ورفع minSdkVersion إلى 23 لحل تعارض مكتبة الجيولكيشن
         cat <<EOF > android/variables.gradle
         ext {
             minSdkVersion = 23
@@ -51,10 +51,10 @@ jobs:
         }
         EOF
 
-        # تحديث إصدار Gradle Plugin ليتوافق مع متطلبات المكتبات
+        # تحديث إصدار Gradle Plugin ليتوافق مع متطلبات المكتبات الحديثة
         sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
         
-        # إضافة إعدادات التوافق
+        # إضافة إعدادات التوافق وتخطي تحذيرات الـ SDK
         echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
         echo "android.experimental.privacySandboxSdk.enable=false" >> android/gradle.properties
 
