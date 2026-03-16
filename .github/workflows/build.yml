@@ -21,18 +21,19 @@ jobs:
     - name: Install Dependencies
       run: |
         npm install
-        # تثبيت الأدوات المطلوبة بشكل صريح وتثبيت TypeScript لحل المشكلة الأخيرة
         npm install @capacitor/core @capacitor/cli @capacitor/android typescript -D
 
-    - name: Initialize Capacitor
+    - name: Build Web Assets
+      run: |
+        # التأكد من وجود المجلد العام
+        mkdir -p public
+        # هنا يمكنك إضافة أمر بناء المشروع إذا كنت تستخدم React أو Vue
+        # npm run build 
+
+    - name: Capacitor Sync
       run: |
         npx cap init "Private Dialer" "com.privatedialer.app" --web-dir public --noprompt || true
-
-    - name: Build Android Project
-      run: |
-        # إضافة المنصة ومزامنة الملفات
-        npx cap add android || echo "Android platform already exists"
-        npx cap copy android
+        npx cap add android || echo "Android platform exists"
         npx cap sync android
 
     - name: Set up JDK 17
@@ -43,9 +44,16 @@ jobs:
 
     - name: Build APK (Debug)
       run: |
+        # التأكد من الدخول للمجلد الصحيح والبحث عن ملف gradlew
         cd android
-        chmod +x gradlew
-        ./gradlew assembleDebug
+        if [ -f "gradlew" ]; then
+          chmod +x gradlew
+          ./gradlew assembleDebug
+        else
+          echo "Error: gradlew not found in /android folder"
+          ls -R # لعرض الملفات الموجودة للمساعدة في التشخيص
+          exit 1
+        fi
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
