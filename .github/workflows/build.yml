@@ -1,4 +1,4 @@
-name: Build Android APK (Private Dialer)
+name: Build Android APK (Final Fix)
 
 on:
   push:
@@ -16,7 +16,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20.x
-        cache: 'npm'
 
     - name: Install Dependencies
       run: |
@@ -30,20 +29,32 @@ jobs:
         npx cap add android
         npx cap sync android
 
-    - name: Force Update Android SDK to 36
+    - name: Force Fix Android Configuration
       run: |
-        # تعديل ملف variables.gradle لفرض الإصدار 36
-        if [ -f android/variables.gradle ]; then
-          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 36/g' android/variables.gradle
-          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 36/g' android/variables.gradle
-          echo "Variables updated to SDK 36"
-        fi
+        # 1. تحديث ملف المتغيرات ليكون متوافقاً مع SDK 36 و Gradle 8.9
+        cat <<EOF > android/variables.gradle
+        ext {
+            minSdkVersion = 22
+            compileSdkVersion = 36
+            targetSdkVersion = 36
+            androidxActivityVersion = '1.9.2'
+            androidxAppCompatVersion = '1.7.0'
+            androidxCoordinatorLayoutVersion = '1.2.0'
+            androidxCoreVersion = '1.13.1'
+            androidxFragmentVersion = '1.8.3'
+            junitVersion = '4.13.2'
+            androidxJunitVersion = '1.2.1'
+            androidxEspressoCoreVersion = '3.6.1'
+            cordovaAndroidVersion = '10.1.1'
+        }
+        EOF
+
+        # 2. تحديث ملف build.gradle الرئيسي لرفع إصدار الـ Plugin
+        sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
         
-        # تعديل ملف build.gradle الرئيسي لرفع إصدار أداة البناء (Gradle Plugin)
-        sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.7.2/g' android/build.gradle
-        
-        # إضافة إعدادات لتجاوز فحص المكتبات المتعارضة
+        # 3. تعطيل خاصية Sandbox التي تسبب أخطاء في الإصدارات الجديدة
         echo "android.experimental.privacySandboxSdk.enable=false" >> android/gradle.properties
+        echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
