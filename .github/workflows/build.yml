@@ -23,19 +23,20 @@ jobs:
         npm install
         npm install @capacitor/core @capacitor/cli @capacitor/android typescript -D
 
-    - name: Build Web Assets
+    - name: Capacitor Sync
       run: |
-        mkdir -p public
-        # تأكد أن ملف index.html موجود في مجلد public
-        if [ ! -f public/index.html ]; then echo "<html><body><h1>Private Dialer</h1></body></html>" > public/index.html; fi
-
-    - name: Clean and Re-add Android Platform
-      run: |
-        # حذف المجلد القديم لضمان إعادة بناء ملفات Gradle من جديد
         rm -rf android
         npx cap init "Private Dialer" "com.privatedialer.app" --web-dir public --noprompt || true
         npx cap add android
         npx cap sync android
+
+    - name: Fix Android SDK Versions
+      run: |
+        # هذا الأمر يقوم بتحديث إصدار الـ SDK إلى 36 وإصدار الأدوات ليتوافق مع المكتبات الجديدة
+        sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 36/g' android/variables.gradle
+        sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 36/g' android/variables.gradle
+        # تحديث إصدار Gradle Plugin ليتوافق مع متطلبات المكتبة
+        sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle || echo "Done"
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -46,9 +47,8 @@ jobs:
     - name: Build APK (Debug)
       run: |
         cd android
-        # الآن ملف gradlew سيكون موجوداً بالتأكيد بعد عملية cap add
         chmod +x gradlew
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --stacktrace
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
