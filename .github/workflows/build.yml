@@ -25,15 +25,16 @@ jobs:
 
     - name: Build Web Assets
       run: |
-        # التأكد من وجود المجلد العام
         mkdir -p public
-        # هنا يمكنك إضافة أمر بناء المشروع إذا كنت تستخدم React أو Vue
-        # npm run build 
+        # تأكد أن ملف index.html موجود في مجلد public
+        if [ ! -f public/index.html ]; then echo "<html><body><h1>Private Dialer</h1></body></html>" > public/index.html; fi
 
-    - name: Capacitor Sync
+    - name: Clean and Re-add Android Platform
       run: |
+        # حذف المجلد القديم لضمان إعادة بناء ملفات Gradle من جديد
+        rm -rf android
         npx cap init "Private Dialer" "com.privatedialer.app" --web-dir public --noprompt || true
-        npx cap add android || echo "Android platform exists"
+        npx cap add android
         npx cap sync android
 
     - name: Set up JDK 17
@@ -44,16 +45,10 @@ jobs:
 
     - name: Build APK (Debug)
       run: |
-        # التأكد من الدخول للمجلد الصحيح والبحث عن ملف gradlew
         cd android
-        if [ -f "gradlew" ]; then
-          chmod +x gradlew
-          ./gradlew assembleDebug
-        else
-          echo "Error: gradlew not found in /android folder"
-          ls -R # لعرض الملفات الموجودة للمساعدة في التشخيص
-          exit 1
-        fi
+        # الآن ملف gradlew سيكون موجوداً بالتأكيد بعد عملية cap add
+        chmod +x gradlew
+        ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
