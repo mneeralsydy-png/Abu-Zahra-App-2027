@@ -1,4 +1,4 @@
-name: Build Android APK (Final Stable Version)
+name: Build Android APK (Abu Al-Zahra Fixed)
 
 on:
   push:
@@ -22,11 +22,12 @@ jobs:
         npm install
         npm install -D @capacitor/core @capacitor/cli @capacitor/android typescript
 
-    - name: Capacitor Sync & Android Prep
+    # خطوة جوهرية: بناء الويب ثم إضافة منصة الأندرويد لضمان وجود ملف gradlew
+    - name: Build Web & Sync Android
       run: |
-        npx cap sync android || npx cap add android
-        # التأكد من وجود مجلد الأندرويد والملفات الأساسية
-        if [ ! -d "android" ]; then npx cap add android; fi
+        npm run build --if-present
+        npx cap add android || true
+        npx cap sync android
 
     - name: Create Google Services File
       run: |
@@ -45,10 +46,11 @@ jobs:
         }
         EOF
         
-        # البحث عن ملف build.gradle وتحديثه بأمان لتجنب خطأ "No such file"
-        find android -name "build.gradle" -exec sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' {} +
+        # تحديث نسخة الـ Gradle Plugin
+        if [ -f "android/build.gradle" ]; then
+          sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
+        fi
         
-        # إعدادات الخصوصية والتوافق
         echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
         echo "android.experimental.privacySandboxSdk.enable=false" >> android/gradle.properties
 
@@ -58,10 +60,17 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
+    # تحسين خطوة جلب مفتاح SHA1 لضمان الوصول للملف
     - name: Get SHA1 Key
       run: |
-        cd android && chmod +x gradlew
-        ./gradlew signingReport | grep -A 5 "Variant: debug" || true
+        if [ -f "android/gradlew" ]; then
+          cd android
+          chmod +x gradlew
+          ./gradlew signingReport | grep -A 5 "Variant: debug" || true
+        else
+          echo "Error: gradlew not found in android directory"
+          exit 1
+        fi
 
     - name: Build APK (Debug)
       run: |
@@ -71,5 +80,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: Abu-Zahra-Final-App
+        name: Abu-Zahra-Final-APK
         path: android/app/build/outputs/apk/debug/app-debug.apk
