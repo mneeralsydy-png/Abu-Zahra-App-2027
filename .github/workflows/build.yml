@@ -21,16 +21,17 @@ jobs:
     - name: Install Dependencies
       run: |
         npm install
-        npm install @capacitor/core @capacitor/cli @capacitor/android
+        # تثبيت الأدوات المطلوبة بشكل صريح وتثبيت TypeScript لحل المشكلة الأخيرة
+        npm install @capacitor/core @capacitor/cli @capacitor/android typescript -D
 
     - name: Initialize Capacitor
       run: |
-        # إذا لم يكن لديك ملف إعدادات، سيقوم هذا الأمر بإنشائه برمجياً
         npx cap init "Private Dialer" "com.privatedialer.app" --web-dir public --noprompt || true
 
     - name: Build Android Project
       run: |
-        npx cap add android
+        # إضافة المنصة ومزامنة الملفات
+        npx cap add android || echo "Android platform already exists"
         npx cap copy android
         npx cap sync android
 
