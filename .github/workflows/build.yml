@@ -1,4 +1,4 @@
-name: Build Android APK (Final Fix)
+name: Build Android APK (Final Success)
 
 on:
   push:
@@ -31,17 +31,19 @@ jobs:
 
     - name: Force Fix Android Configuration
       run: |
-        # 1. تحديث ملف المتغيرات ليكون متوافقاً مع SDK 36 و Gradle 8.9
+        # إعادة كتابة ملف المتغيرات ليشمل كل ما طلبه نظام الأندرويد في الصور السابقة
         cat <<EOF > android/variables.gradle
         ext {
             minSdkVersion = 22
-            compileSdkVersion = 36
-            targetSdkVersion = 36
+            compileSdkVersion = 35
+            targetSdkVersion = 35
             androidxActivityVersion = '1.9.2'
             androidxAppCompatVersion = '1.7.0'
             androidxCoordinatorLayoutVersion = '1.2.0'
             androidxCoreVersion = '1.13.1'
             androidxFragmentVersion = '1.8.3'
+            coreSplashScreenVersion = '1.0.1'
+            androidxResourceInspectionVersion = '1.0.1'
             junitVersion = '4.13.2'
             androidxJunitVersion = '1.2.1'
             androidxEspressoCoreVersion = '3.6.1'
@@ -49,12 +51,12 @@ jobs:
         }
         EOF
 
-        # 2. تحديث ملف build.gradle الرئيسي لرفع إصدار الـ Plugin
-        sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
+        # تحديث إصدار Gradle Plugin ليتوافق مع البيئة الحالية
+        sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.7.2/g' android/build.gradle
         
-        # 3. تعطيل خاصية Sandbox التي تسبب أخطاء في الإصدارات الجديدة
+        # تعطيل الخصائص التي تسبب تعارضات في بيئة الـ Build
         echo "android.experimental.privacySandboxSdk.enable=false" >> android/gradle.properties
-        echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
+        echo "android.nonTransitiveRClass=true" >> android/gradle.properties
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
