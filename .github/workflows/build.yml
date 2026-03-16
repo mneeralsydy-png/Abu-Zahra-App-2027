@@ -1,4 +1,4 @@
-name: Build Android APK (Abu Al-Zahra VoIP)
+name: Build Android APK (Final Stable Version)
 
 on:
   push:
@@ -22,17 +22,20 @@ jobs:
         npm install
         npm install -D @capacitor/core @capacitor/cli @capacitor/android typescript
 
-    # إنشاء ملف google-services.json من الأسرار لضمان الاتصال بالخادم
+    - name: Capacitor Sync & Android Prep
+      run: |
+        npx cap sync android || npx cap add android
+        # التأكد من وجود مجلد الأندرويد والملفات الأساسية
+        if [ ! -d "android" ]; then npx cap add android; fi
+
     - name: Create Google Services File
       run: |
+        mkdir -p android/app
         echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
-
-    - name: Capacitor Sync
-      run: npx cap sync android
 
     - name: Force Fix Android Configuration
       run: |
-        # ضبط المتغيرات لضمان التوافق مع المكتبات الحديثة
+        # تحديث المتغيرات لضمان التوافق مع SDK 36
         cat <<EOF > android/variables.gradle
         ext {
             minSdkVersion = 23
@@ -41,23 +44,23 @@ jobs:
             coreSplashScreenVersion = '1.0.1'
         }
         EOF
-        # تحديث إصدار Gradle Plugin ليتوافق مع Java 21
-        sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
+        
+        # البحث عن ملف build.gradle وتحديثه بأمان لتجنب خطأ "No such file"
+        find android -name "build.gradle" -exec sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' {} +
+        
+        # إعدادات الخصوصية والتوافق
         echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
         echo "android.experimental.privacySandboxSdk.enable=false" >> android/gradle.properties
 
-    # رفع إصدار الجافا إلى 21 لتجنب خطأ "invalid source release"
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
 
-    # استخراج مفتاح SHA-1 لربطه بـ Firebase وإصلاح خطأ الاتصال
     - name: Get SHA1 Key
       run: |
-        cd android
-        chmod +x gradlew
+        cd android && chmod +x gradlew
         ./gradlew signingReport | grep -A 5 "Variant: debug" || true
 
     - name: Build APK (Debug)
@@ -68,5 +71,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: Abu-Zahra-VoIP-APK
+        name: Abu-Zahra-Final-App
         path: android/app/build/outputs/apk/debug/app-debug.apk
