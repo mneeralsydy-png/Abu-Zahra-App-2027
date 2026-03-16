@@ -47,7 +47,7 @@ const dbGet = (sql, params = []) => {
       balance REAL DEFAULT 0,
       is_new_user INTEGER DEFAULT 1
     )`);
-    
+
     await dbRun(`CREATE TABLE IF NOT EXISTS calls (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       userId INTEGER,
@@ -56,7 +56,7 @@ const dbGet = (sql, params = []) => {
       cost REAL,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
-    
+
     await dbRun(`CREATE TABLE IF NOT EXISTS sms (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       userId INTEGER,
@@ -66,7 +66,7 @@ const dbGet = (sql, params = []) => {
       cost REAL DEFAULT 0.05,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
-    
+
     console.log("✅ Database tables created successfully");
   } catch (e) {
     console.error("Database init error:", e);
@@ -114,7 +114,7 @@ app.post("/api/register", async (req, res) => {
       "INSERT INTO users (email, password, balance, is_new_user) VALUES (?, ?, 0, 1)",
       [email, hash]
     );
-    
+
     res.json({ ok: true, message: "تم التسجيل بنجاح" });
   } catch (e) {
     console.error("Register error:", e);
@@ -278,7 +278,7 @@ app.post("/api/firebase-auth", async (req, res) => {
 
     // Check if user exists, if not create them
     let user = await dbGet("SELECT * FROM users WHERE email = ?", [email]);
-    
+
     if (!user) {
       // Create new user from Firebase
       await dbRun(
@@ -437,3 +437,4 @@ app.get("/api/user-info", authenticate, async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
+

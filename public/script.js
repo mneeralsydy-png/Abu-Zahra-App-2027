@@ -610,10 +610,8 @@ async function loadAccountInfo() {
         });
         const data = await res.json();
         if (data.ok) {
-            document.getElementById('account-uid-display').innerText = `#${data.uid}`;
-            document.getElementById('account-us-number-display').innerText = data.virtualNumber;
-            document.getElementById('account-email-display').innerText = data.email;
-            document.getElementById('account-balance-display').innerText = `$${data.balance.toFixed(2)}`;
+            const numEl = document.getElementById('account-us-number-display');
+            if (numEl) numEl.innerText = data.virtualNumber;
         }
     } catch (e) {
         console.error("Load account info error:", e);
@@ -822,3 +820,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         showAuth('start');
     }
 });
+
