@@ -1,4 +1,4 @@
-name: Build Android APK (Final Stable Success)
+name: Build Android APK (Final Stable Fix)
 
 on:
   push:
@@ -24,10 +24,10 @@ jobs:
 
     - name: Capacitor Sync & Prep
       run: |
-        # إنشاء مجلد الويب لضمان نجاح كاباسيتور
         mkdir -p public
         echo "<html></html>" > public/index.html
         rm -rf android
+        # استخدم اسم الحزمة الخاص بك هنا com.munir.abuzahra
         npx cap init "Abu Al-Zahra VoIP" "com.munir.abuzahra" --web-dir public --noprompt || true
         npx cap add android
         npx cap sync android
@@ -37,16 +37,29 @@ jobs:
         mkdir -p android/app
         echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
 
-    - name: Force Upgrade SDK & Plugin
+    - name: Force Fix Dependencies & SDK
       run: |
+        # إعادة بناء ملف المتغيرات بشكل كامل وشامل لمنع خطأ "unknown property"
         cat <<EOF > android/variables.gradle
         ext {
             minSdkVersion = 23
             compileSdkVersion = 36
             targetSdkVersion = 36
+            androidxActivityVersion = '1.9.2'
+            androidxAppCompatVersion = '1.7.0'
+            androidxCoordinatorLayoutVersion = '1.2.0'
+            androidxCoreVersion = '1.13.1'
+            androidxFragmentVersion = '1.8.3'
             coreSplashScreenVersion = '1.0.1'
+            androidxResourceInspectionVersion = '1.0.1'
+            junitVersion = '4.13.2'
+            androidxJunitVersion = '1.2.1'
+            androidxEspressoCoreVersion = '3.6.1'
+            cordovaAndroidVersion = '10.1.1'
         }
         EOF
+        
+        # تحديث إصدار Gradle Plugin ليتوافق مع Java 21
         sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
         echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
 
@@ -56,7 +69,6 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    # استخراج SHA-1 (ضروري جداً لحل مشكلة الاتصال بالخادم)
     - name: Get SHA1 Key
       run: |
         cd android
