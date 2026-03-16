@@ -1,4 +1,4 @@
-name: Build Android APK (Final Success)
+name: Build Android APK (Final Fix)
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
 
     - name: Force Upgrade SDK & Plugin
       run: |
-        # تحديث المتغيرات ورفع minSdkVersion إلى 23 لحل تعارض مكتبة الجيولكيشن
+        # ضبط الإعدادات لتتوافق مع متطلبات الأندرويد الحديثة
         cat <<EOF > android/variables.gradle
         ext {
             minSdkVersion = 23
@@ -51,17 +51,18 @@ jobs:
         }
         EOF
 
-        # تحديث إصدار Gradle Plugin ليتوافق مع متطلبات المكتبات الحديثة
+        # رفع إصدار الـ Plugin ليتناسب مع Java 21 و SDK 36
         sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
         
-        # إضافة إعدادات التوافق وتخطي تحذيرات الـ SDK
+        # تعطيل الخصائص المتعارضة
         echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
         echo "android.experimental.privacySandboxSdk.enable=false" >> android/gradle.properties
 
-    - name: Set up JDK 17
+    # الخطوة الجوهرية: رفع إصدار Java من 17 إلى 21
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
 
     - name: Build APK (Debug)
