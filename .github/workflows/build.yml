@@ -12,11 +12,9 @@ jobs:
 
     strategy:
       matrix:
-        # اختبار التطبيق على أهم إصدارات Node.js المستقرة
         node-version: [18.x, 20.x]
 
     steps:
-    # استخدام الإصدار الرابع (v4) لسرعة أفضل في سحب الكود
     - name: Checkout Code
       uses: actions/checkout@v4
 
@@ -30,38 +28,35 @@ jobs:
       run: npm install
 
     - name: Security Audit
-      run: npm audit --audit-level=high || echo "تحذير: توجد ثغرات أمنية في المكتبات المستخدمة"
+      run: npm audit --audit-level=high || echo "Audit finished with warnings"
 
     - name: Check Node.js version
       run: |
-        echo "Node Version: $(node -version)"
-        echo "NPM Version: $(npm -version)"
+        node -v
+        npm -v
 
     - name: Validate Scripts Syntax
       run: |
         node --check server.js
-        if [ -f public/script.js ]; then
-          node --check public/script.js
-        fi
+        if [ -f public/script.js ]; then node --check public/script.js; fi
 
     - name: Verify HTML structure
       run: |
         if [ -f public/index.html ]; then
-          echo "✓ index.html exists"
+          echo "index.html exists"
         else
-          echo "✗ index.html not found"
+          echo "index.html not found"
           exit 1
         fi
 
     - name: Check database initialization
       run: |
-        # تشغيل السيرفر في الخلفية لفترة قصيرة للتأكد من إنشاء SQLite
-        timeout 10 node server.js & 
+        timeout 10s node server.js & 
         sleep 5
         if [ -f database.db ]; then
-          echo "✓ Database created successfully"
+          echo "Database created successfully"
         else
-          echo "✗ Database initialization failed"
+          echo "Database initialization failed"
           exit 1
         fi
         pkill -f "node server.js" || true
@@ -71,16 +66,11 @@ jobs:
         echo "=========================================="
         echo "      Build Configuration Summary         "
         echo "=========================================="
-        echo "Project: Private Dialer (أبو الزهراء)"
+        echo "Project: Private Dialer"
         echo "App ID: com.privatedialer.app"
-        echo "Environment: Production/Testing"
         echo "Database: SQLite (database.db)"
-        echo "Required Secrets for Twilio:"
-        echo "  - TWILIO_ACCOUNT_SID"
-        echo "  - TWILIO_AUTH_TOKEN"
         echo "=========================================="
 
-    # اختيار اختياري: رفع قاعدة البيانات الناتجة كملف (Artifact) لفحصها لاحقاً
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
