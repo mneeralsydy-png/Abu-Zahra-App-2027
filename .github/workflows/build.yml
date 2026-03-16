@@ -1,4 +1,4 @@
-node-version-version: Build and Test Private Dialer
+: Build and Test Private Dialer
 
 on:
   push:
