@@ -1,4 +1,4 @@
-name: Build Android APK (Standard Success)
+name: Build Android APK (Final Success)
 
 on:
   push:
@@ -29,12 +29,12 @@ jobs:
         npx cap add android
         npx cap sync android
 
-    - name: Force Upgrade to SDK 36 and Plugin 8.9.1
+    - name: Force Upgrade SDK & Plugin
       run: |
-        # 1. تحديث متغيرات الإصدارات
+        # تحديث متغيرات الإصدارات ورفع minSdkVersion إلى 23 لحل الخطأ الأخير
         cat <<EOF > android/variables.gradle
         ext {
-            minSdkVersion = 22
+            minSdkVersion = 23
             compileSdkVersion = 36
             targetSdkVersion = 36
             androidxActivityVersion = '1.9.2'
@@ -51,11 +51,10 @@ jobs:
         }
         EOF
 
-        # 2. تحديث ملف build.gradle الرئيسي لرفع إصدار الـ Plugin إلى 8.9.1
-        # هذا هو التعديل الجوهري الذي طلبته رسالة الخطأ الأخيرة
+        # تحديث إصدار Gradle Plugin ليتوافق مع متطلبات المكتبات
         sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
         
-        # 3. تجاهل تحذيرات التوافق لإتمام البناء
+        # إضافة إعدادات التوافق
         echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
         echo "android.experimental.privacySandboxSdk.enable=false" >> android/gradle.properties
 
