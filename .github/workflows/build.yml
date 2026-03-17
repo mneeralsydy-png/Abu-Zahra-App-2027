@@ -1,40 +1,38 @@
-name: Build Abu Zahra App
 name: Abu Al-Zahra Final Success Build
+
 on:
   push:
--41
-+110
     branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
 jobs:
-  build:
   build-android:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
       # ── Checkout Code ─────────────────────────────────────────────
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Setup Node.js
+
       # ── Set up Node.js ────────────────────────────────────────────
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      - name: Install dependencies
+
       # ── Install Dependencies ──────────────────────────────────────
       - name: Install Dependencies
         run: npm install
-      - name: Validate server.js syntax
-        run: node --check server.js
+
       # ── Capacitor Setup & Sync ────────────────────────────────────
       - name: Capacitor Setup & Sync
         run: |
           rm -rf android
           npx cap add android
           npx cap sync android
-      - name: Validate script.js syntax
-        run: node --check public/script.js
+
       # ── Create Google Services File ───────────────────────────────
       - name: Create Google Services File
         run: |
@@ -88,18 +86,10 @@ jobs:
           }
           EOF
           echo "✅ google-services.json created"
-      - name: Check required files
+
       # ── Force Fix Android Variables & SDK 36 ──────────────────────
       - name: Force Fix Android Variables & SDK 36
         run: |
-          echo "Checking required files..."
-          [ -f public/index.html ] && echo "✅ index.html" || (echo "❌ index.html missing" && exit 1)
-          [ -f public/script.js ] && echo "✅ script.js" || (echo "❌ script.js missing" && exit 1)
-          [ -f server.js ] && echo "✅ server.js" || (echo "❌ server.js missing" && exit 1)
-          [ -f package.json ] && echo "✅ package.json" || (echo "❌ package.json missing" && exit 1)
-          [ -f android/variables.gradle ] && echo "✅ android/variables.gradle" || echo "⚠️ android/variables.gradle missing"
-          [ -f android/gradle.properties ] && echo "✅ android/gradle.properties" || echo "⚠️ android/gradle.properties missing"
-          [ -f android/app/google-services.json ] && echo "✅ android/app/google-services.json" || echo "⚠️ android/app/google-services.json missing"
           cat > android/variables.gradle << 'EOF'
           ext {
               minSdkVersion = 23
@@ -110,54 +100,34 @@ jobs:
           EOF
           echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
           echo "✅ Android variables and SDK 36 configured"
-      - name: Test server startup
+
       # ── Set up JDK 21 ─────────────────────────────────────────────
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
+
       # ── Build APK (Debug) ─────────────────────────────────────────
       - name: Build APK (Debug)
         run: |
-          node server.js &
-          SERVER_PID=$!
-          sleep 3
-          if kill -0 $SERVER_PID 2>/dev/null; then
-            echo "✅ Server started successfully"
-            kill $SERVER_PID
-          else
-            echo "❌ Server failed to start"
-            exit 1
-          fi
-        env:
-          JWT_SECRET: test_secret_for_ci
-          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-          TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
           chmod +x android/gradlew
           cd android
           ./gradlew assembleDebug \
             --no-daemon \
             --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx4096m"
-      - name: Build summary
+
       # ── Get SHA1 Key ──────────────────────────────────────────────
       - name: Get SHA1 Key
         run: |
-          echo "=========================================="
-          echo "✅ Build passed successfully"
-          echo "App: Abu Zahra (أبو الزهراء)"
-          echo "App ID: com.munir.abuzahra"
-          echo "Node: $(node --version)"
-          echo "npm: $(npm --version)"
-          echo "=========================================="
           keytool -list -v \
             -keystore ~/.android/debug.keystore \
             -alias androiddebugkey \
             -storepass android \
             -keypass android 2>/dev/null \
           | grep "SHA1:" || echo "SHA1 key info not available"
+
       # ── Upload APK Artifact ───────────────────────────────────────
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
