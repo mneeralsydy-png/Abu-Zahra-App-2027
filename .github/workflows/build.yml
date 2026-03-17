@@ -26,16 +26,15 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
-          # تثبيت الأدوات الأساسية لـ Capacitor لضمان وجودها في المسار
+          # تثبيت أدوات Capacitor لضمان وجود المسارات التنفيذية
           npm install @capacitor/cli @capacitor/core @capacitor/android
           npm install -D typescript
 
       # ── Capacitor Setup & Sync ────────────────────────────────────
       - name: Capacitor Setup & Sync
         run: |
-          # حذف المجلد القديم إن وجد للبدء من جديد
           rm -rf android
-          # استخدام اسم الحزمة الكامل مع --yes لتفادي توقف npx
+          # استخدام --yes لتجاوز أي مطالبات تفاعلية
           npx --yes @capacitor/cli add android
           npx --yes @capacitor/cli sync android
 
@@ -96,17 +95,21 @@ jobs:
       # ── Force Fix Android Variables & SDK 34 ──────────────────────
       - name: Force Fix Android Variables & SDK 34
         run: |
-          # ملاحظة: تم تعديل السوك إلى 34 لضمان استقرار البناء
+          # هنا تم إضافة androidxCoordinatorLayoutVersion والمتغيرات الأخرى لحل خطأ Gradle
           cat > android/variables.gradle << 'EOF'
           ext {
               minSdkVersion = 23
               compileSdkVersion = 34
               targetSdkVersion = 34
               androidxAppCompatVersion = '1.7.0'
+              androidxCoordinatorLayoutVersion = '1.2.0'
+              androidxCoreVersion = '1.12.0'
+              androidxAnnotationVersion = '1.7.0'
+              googlePlayServicesLocationVersion = '21.0.1'
           }
           EOF
           echo "android.suppressUnsupportedCompileSdk=34" >> android/gradle.properties
-          echo "✅ Android variables and SDK 34 configured"
+          echo "✅ Android variables and SDK 34 configured with all dependencies"
 
       # ── Set up JDK 17 ─────────────────────────────────────────────
       - name: Set up JDK 17
