@@ -27,7 +27,7 @@ jobs:
         mkdir -p public
         echo "<html><body>Abu Al-Zahra VoIP</body></html>" > public/index.html
         rm -rf android
-        # استخدمنا com.munir.abuzahra لأنها مطابقة لملف الـ JSON الخاص بك
+        # استخدمنا الاسم المطابق لملف الـ JSON الخاص بك لضمان نجاح البناء
         npx cap init "Abu Al-Zahra" "com.munir.abuzahra" --web-dir public --noprompt || true
         npx cap add android
         npx cap sync android
@@ -39,6 +39,7 @@ jobs:
 
     - name: Force Fix All Variables
       run: |
+        # تعريف كافة المتغيرات المفقودة التي سببت الخطأ في الصورة #3
         cat <<EOF > android/variables.gradle
         ext {
             minSdkVersion = 23
@@ -66,16 +67,16 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    - name: Build APK (Debug)
-      run: |
-        cd android
-        chmod +x gradlew
-        ./gradlew assembleDebug --no-daemon
-
     - name: Get SHA1 Key
       run: |
         cd android
+        chmod +x gradlew
         ./gradlew signingReport | grep -A 5 "Variant: debug" || true
+
+    - name: Build APK (Debug)
+      run: |
+        cd android
+        ./gradlew assembleDebug --no-daemon
 
     - name: Upload APK
       if: always()
