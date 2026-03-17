@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22' # تم التحديث إلى 22 لحل المشكلة
+          node-version: '22'
           cache: 'npm'
 
       # ── Install Dependencies ──────────────────────────────────────
@@ -90,12 +90,12 @@ jobs:
           EOF
           echo "✅ google-services.json created"
 
-      # ── Force Fix Android Variables ───────────────────────────────
+      # ── Force Fix Android Variables (Updated minSdk to 24) ────────
       - name: Force Fix Android Variables
         run: |
           cat > android/variables.gradle << 'EOF'
           ext {
-              minSdkVersion = 23
+              minSdkVersion = 24  // تم التغيير من 23 إلى 24 لحل تعارض Cordova
               compileSdkVersion = 36
               targetSdkVersion = 36
               androidxAppCompatVersion = '1.7.0'
@@ -112,7 +112,7 @@ jobs:
           }
           EOF
           echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
-          echo "✅ Android variables fixed for SDK 36"
+          echo "✅ Android variables fixed with minSdkVersion 24"
 
       # ── Set up JDK 21 ─────────────────────────────────────────────
       - name: Set up JDK 21
