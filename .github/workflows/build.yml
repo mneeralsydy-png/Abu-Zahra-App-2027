@@ -26,14 +26,18 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
+          # تثبيت الأدوات الأساسية لـ Capacitor لضمان وجودها في المسار
+          npm install @capacitor/cli @capacitor/core @capacitor/android
           npm install -D typescript
 
       # ── Capacitor Setup & Sync ────────────────────────────────────
       - name: Capacitor Setup & Sync
         run: |
+          # حذف المجلد القديم إن وجد للبدء من جديد
           rm -rf android
-          npx cap add android
-          npx cap sync android
+          # استخدام اسم الحزمة الكامل مع --yes لتفادي توقف npx
+          npx --yes @capacitor/cli add android
+          npx --yes @capacitor/cli sync android
 
       # ── Create Google Services File ───────────────────────────────
       - name: Create Google Services File
@@ -89,26 +93,27 @@ jobs:
           EOF
           echo "✅ google-services.json created"
 
-      # ── Force Fix Android Variables & SDK 36 ──────────────────────
-      - name: Force Fix Android Variables & SDK 36
+      # ── Force Fix Android Variables & SDK 34 ──────────────────────
+      - name: Force Fix Android Variables & SDK 34
         run: |
+          # ملاحظة: تم تعديل السوك إلى 34 لضمان استقرار البناء
           cat > android/variables.gradle << 'EOF'
           ext {
               minSdkVersion = 23
-              compileSdkVersion = 36
-              targetSdkVersion = 36
+              compileSdkVersion = 34
+              targetSdkVersion = 34
               androidxAppCompatVersion = '1.7.0'
           }
           EOF
-          echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
-          echo "✅ Android variables and SDK 36 configured"
+          echo "android.suppressUnsupportedCompileSdk=34" >> android/gradle.properties
+          echo "✅ Android variables and SDK 34 configured"
 
-      # ── Set up JDK 21 ─────────────────────────────────────────────
-      - name: Set up JDK 21
+      # ── Set up JDK 17 ─────────────────────────────────────────────
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
       # ── Build APK (Debug) ─────────────────────────────────────────
       - name: Build APK (Debug)
