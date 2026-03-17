@@ -26,7 +26,8 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
-          npm install @capacitor/cli @capacitor/core @capacitor/android
+          # نثبت نفس النسخ الموجودة في package.json الخاص بك لضمان التوافق
+          npm install @capacitor/cli@latest
           npm install -D typescript
 
       # ── Capacitor Setup & Sync ────────────────────────────────────
@@ -90,31 +91,39 @@ jobs:
           EOF
           echo "✅ google-services.json created"
 
-      # ── Force Fix Android Variables & SDK 34 ──────────────────────
-      - name: Force Fix Android Variables & SDK 34
+      # ── Force Fix Android Variables (Comprehensive for Capacitor 8) 
+      - name: Force Fix Android Variables
         run: |
           cat > android/variables.gradle << 'EOF'
           ext {
               minSdkVersion = 23
-              compileSdkVersion = 34
-              targetSdkVersion = 34
+              compileSdkVersion = 36
+              targetSdkVersion = 36
               androidxAppCompatVersion = '1.7.0'
               androidxCoordinatorLayoutVersion = '1.2.0'
               androidxCoreVersion = '1.12.0'
               androidxAnnotationVersion = '1.7.0'
               coreSplashScreenVersion = '1.0.1'
               googlePlayServicesLocationVersion = '21.0.1'
+              // إصدارات الاختبارات والاعتمادات المطلوبة في النسخ الحديثة
+              junitVersion = '4.13.2'
+              androidxJunitVersion = '1.1.5'
+              androidxEspressoCoreVersion = '3.5.1'
+              // متغيرات إضافية قد تطلبها إضافات Capacitor 8
+              androidxMaterialVersion = '1.11.0'
+              androidxBrowserVersion = '1.7.0'
           }
           EOF
-          echo "android.suppressUnsupportedCompileSdk=34" >> android/gradle.properties
-          echo "✅ All Android variables and Splash Screen version fixed"
+          # تفعيل دعم SDK 36 في Gradle
+          echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
+          echo "✅ All Capacitor 8 variables defined"
 
-      # ── Set up JDK 17 ─────────────────────────────────────────────
-      - name: Set up JDK 17
+      # ── Set up JDK 21 (مطلوب لـ SDK 36) ───────────────────────────
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       # ── Build APK (Debug) ─────────────────────────────────────────
       - name: Build APK (Debug)
