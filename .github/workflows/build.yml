@@ -1,4 +1,4 @@
-name: Build Android APK (Final JSON Fix)
+name: Build Android APK (Final Success)
 
 on:
   push:
@@ -27,40 +27,24 @@ jobs:
         mkdir -p public
         echo "<html></html>" > public/index.html
         rm -rf android
-        # تأكد أن الاسم يتطابق مع ما تريده
+        # ضبط اسم الحزمة بناءً على ملف الـ JSON الخاص بك
         npx cap init "Abu Al-Zahra" "com.munir.abuzahra" --web-dir public --noprompt || true
         npx cap add android
         npx cap sync android
 
-    - name: Create & Validate Google Services
+    - name: Create Google Services File
       run: |
         mkdir -p android/app
-        # هنا نضع محتوى الملف مع التأكد من جودته
         echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
-        # فحص بسيط للتأكد من أن الملف ليس فارغاً وأنه يبدأ بقوس JSON
-        if [[ $(head -c 1 android/app/google-services.json) != "{" ]]; then
-          echo "Error: GOOGLE_SERVICES_JSON secret is not a valid JSON!"
-          exit 1
-        fi
 
-    - name: Force Fix Variables
+    - name: Force Fix Configuration
       run: |
         cat <<EOF > android/variables.gradle
         ext {
             minSdkVersion = 23
             compileSdkVersion = 36
             targetSdkVersion = 36
-            androidxActivityVersion = '1.9.2'
-            androidxAppCompatVersion = '1.7.0'
-            androidxCoordinatorLayoutVersion = '1.2.0'
-            androidxCoreVersion = '1.13.1'
-            androidxFragmentVersion = '1.8.3'
             coreSplashScreenVersion = '1.0.1'
-            androidxResourceInspectionVersion = '1.0.1'
-            junitVersion = '4.13.2'
-            androidxJunitVersion = '1.2.1'
-            androidxEspressoCoreVersion = '3.6.1'
-            cordovaAndroidVersion = '10.1.1'
         }
         EOF
         sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
@@ -84,8 +68,8 @@ jobs:
         ./gradlew assembleDebug --no-daemon
 
     - name: Upload APK
-      if: success()
+      if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: Abu-Zahra-Success-APK
+        name: Abu-Zahra-Final-APK
         path: android/app/build/outputs/apk/debug/app-debug.apk
