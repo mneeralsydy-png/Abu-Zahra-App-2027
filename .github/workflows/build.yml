@@ -1,4 +1,4 @@
-name: Build Android APK (Final Success)
+name: Build Android APK (Final Stable Fix)
 
 on:
   push:
@@ -25,29 +25,45 @@ jobs:
     - name: Capacitor Prep
       run: |
         mkdir -p public
-        echo "<html></html>" > public/index.html
+        echo "<html><body>Abu Al-Zahra VoIP</body></html>" > public/index.html
         rm -rf android
-        # ضبط اسم الحزمة بناءً على ملف الـ JSON الخاص بك
+        # التأكد من استخدام اسم الحزمة الصحيح com.munir.abuzahra
         npx cap init "Abu Al-Zahra" "com.munir.abuzahra" --web-dir public --noprompt || true
         npx cap add android
         npx cap sync android
 
-    - name: Create Google Services File
+    - name: Create & Validate Google Services
       run: |
         mkdir -p android/app
+        # استخدام محتوى الـ JSON الذي استخرجناه سابقاً
         echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
 
-    - name: Force Fix Configuration
+    - name: Force Fix All Variables
       run: |
+        # حل مشكلة "unknown property" بتعريف كافة المتغيرات يدوياً
         cat <<EOF > android/variables.gradle
         ext {
             minSdkVersion = 23
             compileSdkVersion = 36
             targetSdkVersion = 36
+            androidxActivityVersion = '1.9.2'
+            androidxAppCompatVersion = '1.7.0'
+            androidxCoordinatorLayoutVersion = '1.2.0'
+            androidxCoreVersion = '1.13.1'
+            androidxFragmentVersion = '1.8.3'
             coreSplashScreenVersion = '1.0.1'
+            androidxResourceInspectionVersion = '1.0.1'
+            junitVersion = '4.13.2'
+            androidxJunitVersion = '1.2.1'
+            androidxEspressoCoreVersion = '3.6.1'
+            cordovaAndroidVersion = '10.1.1'
         }
         EOF
-        sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
+        
+        # تحديث الجرادل ليتوافق مع جافا 21 و SDK 36
+        if [ -f "android/build.gradle" ]; then
+          sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
+        fi
         echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
 
     - name: Set up JDK 21
@@ -71,5 +87,5 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: Abu-Zahra-Final-APK
+        name: Abu-Zahra-Final-Success
         path: android/app/build/outputs/apk/debug/app-debug.apk
