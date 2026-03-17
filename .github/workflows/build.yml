@@ -22,18 +22,28 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # ── Install Dependencies ──────────────────────────────────────
+      # ── Install Dependencies & Capacitor CLI ──────────────────────
       - name: Install Dependencies
-        run: npm install
+        run: |
+          npm install
+          # تثبيت حزمة أوامر كاباسيتور الضرورية للبناء
+          npm install -D @capacitor/cli
+
+      # ── Prepare Web Directory ─────────────────────────────────────
+      # كاباسيتور يتطلب وجود مجلد الويب لإنشاء مشروع الأندرويد
+      - name: Prepare Web Directory
+        run: |
+          mkdir -p www
+          # ملاحظة: إذا كان اسم المجلد في ملف capacitor.config.json مختلفاً (مثل public)، قم بتغيير www إلى الاسم الصحيح هنا.
 
       # ── Capacitor Setup & Sync ────────────────────────────────────
       - name: Capacitor Setup & Sync
         run: |
-          npm install @capacitor/cli @capacitor/core
           rm -rf android
           npx cap add android
           npx cap sync android
- ───────────────────────────────
+
+      # ── Create Google Services File ───────────────────────────────
       - name: Create Google Services File
         run: |
           mkdir -p android/app
