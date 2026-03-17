@@ -1,11 +1,4 @@
 
-Library
-Commands
-Search files
-Packager files
-.github/workflows/build.yml
--1
-+1
 name: Build Abu Zahra App
 name: Abu Al-Zahra Final Success Build
 on:
