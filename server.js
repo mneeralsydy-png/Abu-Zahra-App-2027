@@ -79,11 +79,11 @@ const twilioClient = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
-
+app.use(cors({
+  origin: '*', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 // Auth Middleware
 const authenticate = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
