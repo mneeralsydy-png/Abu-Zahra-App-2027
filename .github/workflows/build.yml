@@ -15,18 +15,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ── Set up Node.js ────────────────────────────────────────────
+      # ── Set up Node.js 22 (Required for Capacitor 8) ──────────────
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22' # تم التحديث إلى 22 لحل المشكلة
           cache: 'npm'
 
       # ── Install Dependencies ──────────────────────────────────────
       - name: Install Dependencies
         run: |
           npm install
-          # نثبت نفس النسخ الموجودة في package.json الخاص بك لضمان التوافق
           npm install @capacitor/cli@latest
           npm install -D typescript
 
@@ -91,7 +90,7 @@ jobs:
           EOF
           echo "✅ google-services.json created"
 
-      # ── Force Fix Android Variables (Comprehensive for Capacitor 8) 
+      # ── Force Fix Android Variables ───────────────────────────────
       - name: Force Fix Android Variables
         run: |
           cat > android/variables.gradle << 'EOF'
@@ -105,20 +104,17 @@ jobs:
               androidxAnnotationVersion = '1.7.0'
               coreSplashScreenVersion = '1.0.1'
               googlePlayServicesLocationVersion = '21.0.1'
-              // إصدارات الاختبارات والاعتمادات المطلوبة في النسخ الحديثة
               junitVersion = '4.13.2'
               androidxJunitVersion = '1.1.5'
               androidxEspressoCoreVersion = '3.5.1'
-              // متغيرات إضافية قد تطلبها إضافات Capacitor 8
               androidxMaterialVersion = '1.11.0'
               androidxBrowserVersion = '1.7.0'
           }
           EOF
-          # تفعيل دعم SDK 36 في Gradle
           echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
-          echo "✅ All Capacitor 8 variables defined"
+          echo "✅ Android variables fixed for SDK 36"
 
-      # ── Set up JDK 21 (مطلوب لـ SDK 36) ───────────────────────────
+      # ── Set up JDK 21 ─────────────────────────────────────────────
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
