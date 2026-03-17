@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "982107544824",
+    "project_id": "call-now-24582",
+    "storage_bucket": "call-now-24582.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982107544824:android:abuzahra00000001",
+        "android_client_info": {
+          "package_name": "com.munir.abuzahra"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "982107544824-android.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.munir.abuzahra"
+          }
+        },
+        {
+          "client_id": "982107544824-web.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8hrO2kX1zXaA46PImzMGqOt4iTwhXKI0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "982107544824-web.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
