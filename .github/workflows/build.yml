@@ -1,4 +1,4 @@
-name: Build Android APK (Final Package Match)
+name: Build Android APK (Final Rescue)
 
 on:
   push:
@@ -22,12 +22,12 @@ jobs:
         npm install
         npm install @capacitor/core @capacitor/cli @capacitor/android typescript -D
 
-    - name: Capacitor Prep
+    - name: Capacitor Sync & Prep
       run: |
         mkdir -p public
-        echo "<html><body>Abu Al-Zahra VoIP</body></html>" > public/index.html
+        echo "<html><body>Abu Al-Zahra Project</body></html>" > public/index.html
         rm -rf android
-        # استخدمنا الاسم المطابق لملف الـ JSON الخاص بك لضمان نجاح البناء
+        # استخدمنا الاسم المطابق لملف الـ JSON الخاص بك لضمان النجاح
         npx cap init "Abu Al-Zahra" "com.munir.abuzahra" --web-dir public --noprompt || true
         npx cap add android
         npx cap sync android
@@ -37,9 +37,9 @@ jobs:
         mkdir -p android/app
         echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
 
-    - name: Force Fix All Variables
+    - name: Force Fix Android Configuration
       run: |
-        # تعريف كافة المتغيرات المفقودة التي سببت الخطأ في الصورة رقم 3
+        # حل مشكلة المتغيرات المفقودة التي ظهرت في صورك السابقة
         cat <<EOF > android/variables.gradle
         ext {
             minSdkVersion = 23
@@ -61,8 +61,8 @@ jobs:
         sed -i 's/com.android.tools.build:gradle:[0-9.]*/com.android.tools.build:gradle:8.9.1/g' android/build.gradle
         echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
 
-    - name: Set up JDK 21
-      uses: actions/java@v4
+    - name: Set up JDK 21 (Fixed)
+      uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
@@ -82,5 +82,5 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: Abu-Zahra-Final-Success
+        name: Abu-Zahra-Final-APK
         path: android/app/build/outputs/apk/debug/app-debug.apk
