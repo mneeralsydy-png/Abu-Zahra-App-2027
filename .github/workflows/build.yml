@@ -29,11 +29,11 @@ jobs:
       # ── Capacitor Setup & Sync ────────────────────────────────────
       - name: Capacitor Setup & Sync
         run: |
+          npm install @capacitor/cli @capacitor/core
           rm -rf android
           npx cap add android
           npx cap sync android
-
-      # ── Create Google Services File ───────────────────────────────
+ ───────────────────────────────
       - name: Create Google Services File
         run: |
           mkdir -p android/app
