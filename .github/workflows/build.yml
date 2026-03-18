@@ -11,37 +11,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ── Checkout Code ─────────────────────────────────────────────
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ── تحديث رابط السيرفر فقط داخل الملف ──────────────────────────
+      # ── البحث عن الملف وتحديث الرابط في أي مكان يوجد فيه ──────────
       - name: Update Backend URL in Script
         run: |
-          # سيقوم هذا الأمر بالبحث عن السطر الذي يحتوي على REPLIT_BACKEND_URL وتحديثه بالرابط الجديد
-          sed -i "s|const REPLIT_BACKEND_URL = .*|const REPLIT_BACKEND_URL = \"https://6e192a57-0450-4647-9b9d-f85380b0545b-00-10l45y2na70p9.sisko.replit.dev\";|g" index.html
-          echo "✅ Backend URL updated in index.html"
+          # هذا الأمر سيبحث عن أي ملف index.html في المشروع ويستبدل الرابط بداخله
+          find . -name "index.html" -exec sed -i "s|const REPLIT_BACKEND_URL = .*|const REPLIT_BACKEND_URL = \"https://6e192a57-0450-4647-9b9d-f85380b0545b-00-10l45y2na70p9.sisko.replit.dev\";|g" {} +
+          echo "✅ Backend URL updated in all found index.html files"
 
-      # ── Set up Node.js 22 ─────────────────────────────────────────
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
 
-      # ── Install Dependencies ──────────────────────────────────────
       - name: Install Dependencies
         run: |
           npm install
           npm install @capacitor/cli@latest
 
-      # ── Capacitor Sync ────────────────────────────────────────────
       - name: Capacitor Sync
         run: |
-          # مزامنة الملفات مع مجلد أندرويد مباشرة
+          # سنقوم بإنشاء مجلد www وهمي فقط لإرضاء Capacitor إذا لم يكن موجوداً
+          if [ ! -d "www" ]; then mkdir www; fi
+          if [ -f "index.html" ]; then cp index.html www/; fi
+          if [ -d "public" ]; then cp -r public/* www/; fi
           npx cap sync android
 
-      # ── Create Google Services File ───────────────────────────────
       - name: Create Google Services File
         run: |
           mkdir -p android/app
@@ -56,18 +54,12 @@ jobs:
               {
                 "client_info": {
                   "mobilesdk_app_id": "1:982107544824:android:abuzahra00000001",
-                  "android_client_info": {
-                    "package_name": "com.munir.abuzahra"
-                  }
+                  "android_client_info": { "package_name": "com.munir.abuzahra" }
                 },
-                "api_key": [
-                  { "current_key": "AIzaSyD8hrO2kX1zXaA46PImzMGqOt4iTwhXKI0" }
-                ],
+                "api_key": [{ "current_key": "AIzaSyD8hrO2kX1zXaA46PImzMGqOt4iTwhXKI0" }],
                 "services": {
                   "appinvite_service": {
-                    "other_platform_oauth_client": [
-                      { "client_id": "982107544824-web.apps.googleusercontent.com", "client_type": 3 }
-                    ]
+                    "other_platform_oauth_client": [{ "client_id": "982107544824-web.apps.googleusercontent.com", "client_type": 3 }]
                   }
                 }
               }
@@ -75,9 +67,7 @@ jobs:
             "configuration_version": "1"
           }
           EOF
-          echo "✅ google-services.json created"
 
-      # ── Force Fix Android Variables ───────────────────────────────
       - name: Force Fix Android Variables
         run: |
           cat > android/variables.gradle << 'EOF'
@@ -87,26 +77,21 @@ jobs:
               targetSdkVersion = 35
           }
           EOF
-          echo "✅ Android variables fixed"
 
-      # ── Set up JDK 21 ─────────────────────────────────────────────
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      # ── Build APK (Debug) ─────────────────────────────────────────
       - name: Build APK (Debug)
         run: |
           chmod +x android/gradlew
           cd android
           ./gradlew assembleDebug --no-daemon
 
-      # ── Upload APK Artifact ───────────────────────────────────────
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AbuZahra-App-Build-${{ github.run_number }}
+          name: AbuZahra-Final-App
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
