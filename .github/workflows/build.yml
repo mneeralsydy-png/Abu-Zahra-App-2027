@@ -15,7 +15,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ── Set up Node.js 22 (Required for Capacitor 8) ──────────────
+      # ── تحديث رابط السيرفر فقط داخل الملف ──────────────────────────
+      - name: Update Backend URL in Script
+        run: |
+          # سيقوم هذا الأمر بالبحث عن السطر الذي يحتوي على REPLIT_BACKEND_URL وتحديثه بالرابط الجديد
+          sed -i "s|const REPLIT_BACKEND_URL = .*|const REPLIT_BACKEND_URL = \"https://6e192a57-0450-4647-9b9d-f85380b0545b-00-10l45y2na70p9.sisko.replit.dev\";|g" index.html
+          echo "✅ Backend URL updated in index.html"
+
+      # ── Set up Node.js 22 ─────────────────────────────────────────
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -27,14 +34,12 @@ jobs:
         run: |
           npm install
           npm install @capacitor/cli@latest
-          npm install -D typescript
 
-      # ── Capacitor Setup & Sync ────────────────────────────────────
-      - name: Capacitor Setup & Sync
+      # ── Capacitor Sync ────────────────────────────────────────────
+      - name: Capacitor Sync
         run: |
-          rm -rf android
-          npx --yes @capacitor/cli add android
-          npx --yes @capacitor/cli sync android
+          # مزامنة الملفات مع مجلد أندرويد مباشرة
+          npx cap sync android
 
       # ── Create Google Services File ───────────────────────────────
       - name: Create Google Services File
@@ -55,31 +60,13 @@ jobs:
                     "package_name": "com.munir.abuzahra"
                   }
                 },
-                "oauth_client": [
-                  {
-                    "client_id": "982107544824-android.apps.googleusercontent.com",
-                    "client_type": 1,
-                    "android_info": {
-                      "package_name": "com.munir.abuzahra"
-                    }
-                  },
-                  {
-                    "client_id": "982107544824-web.apps.googleusercontent.com",
-                    "client_type": 3
-                  }
-                ],
                 "api_key": [
-                  {
-                    "current_key": "AIzaSyD8hrO2kX1zXaA46PImzMGqOt4iTwhXKI0"
-                  }
+                  { "current_key": "AIzaSyD8hrO2kX1zXaA46PImzMGqOt4iTwhXKI0" }
                 ],
                 "services": {
                   "appinvite_service": {
                     "other_platform_oauth_client": [
-                      {
-                        "client_id": "982107544824-web.apps.googleusercontent.com",
-                        "client_type": 3
-                      }
+                      { "client_id": "982107544824-web.apps.googleusercontent.com", "client_type": 3 }
                     ]
                   }
                 }
@@ -90,29 +77,17 @@ jobs:
           EOF
           echo "✅ google-services.json created"
 
-      # ── Force Fix Android Variables (Updated minSdk to 24) ────────
+      # ── Force Fix Android Variables ───────────────────────────────
       - name: Force Fix Android Variables
         run: |
           cat > android/variables.gradle << 'EOF'
           ext {
-              minSdkVersion = 24  // تم التغيير من 23 إلى 24 لحل تعارض Cordova
-              compileSdkVersion = 36
-              targetSdkVersion = 36
-              androidxAppCompatVersion = '1.7.0'
-              androidxCoordinatorLayoutVersion = '1.2.0'
-              androidxCoreVersion = '1.12.0'
-              androidxAnnotationVersion = '1.7.0'
-              coreSplashScreenVersion = '1.0.1'
-              googlePlayServicesLocationVersion = '21.0.1'
-              junitVersion = '4.13.2'
-              androidxJunitVersion = '1.1.5'
-              androidxEspressoCoreVersion = '3.5.1'
-              androidxMaterialVersion = '1.11.0'
-              androidxBrowserVersion = '1.7.0'
+              minSdkVersion = 24
+              compileSdkVersion = 35
+              targetSdkVersion = 35
           }
           EOF
-          echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
-          echo "✅ Android variables fixed with minSdkVersion 24"
+          echo "✅ Android variables fixed"
 
       # ── Set up JDK 21 ─────────────────────────────────────────────
       - name: Set up JDK 21
@@ -126,26 +101,12 @@ jobs:
         run: |
           chmod +x android/gradlew
           cd android
-          ./gradlew assembleDebug \
-            --no-daemon \
-            --stacktrace \
-            -Dorg.gradle.jvmargs="-Xmx4096m"
-
-      # ── Get SHA1 Key ──────────────────────────────────────────────
-      - name: Get SHA1 Key
-        run: |
-          keytool -list -v \
-            -keystore ~/.android/debug.keystore \
-            -alias androiddebugkey \
-            -storepass android \
-            -keypass android 2>/dev/null \
-          | grep "SHA1:" || echo "SHA1 key info not available"
+          ./gradlew assembleDebug --no-daemon
 
       # ── Upload APK Artifact ───────────────────────────────────────
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AbuZahra-Debug-${{ github.run_number }}
+          name: AbuZahra-App-Build-${{ github.run_number }}
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
-          if-no-files-found: error
+          retention-days: 7
